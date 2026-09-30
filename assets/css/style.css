@@ -10,6 +10,7 @@
   --paper: #faf9f7;
   --accent: #5c3d2e;
   --error: #7a2e2e;
+  color-scheme: light dark;
 
   /* --- LAYOUT: tightened max widths for the human eye --- */
   --measure: 34rem;          /* ~55–60 characters, gentle for reading */
@@ -53,6 +54,12 @@ a {
   text-underline-offset: 0.15em;
 }
 a:hover { text-decoration-thickness: 2px; }
+/* Visible keyboard focus (the site had none) */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
 
 /* ---- site chrome ---- */
 .site-header {
@@ -522,10 +529,27 @@ main,
   line-height: 1.3;
   font-style: italic;
 }
-.home-principle p:last-child {
+/* Premise body text. (Was "p:last-child", which would now hit the
+   "About the author" link instead of the premise paragraph.) */
+.home-principle p:not(.principle-lead):not(.principle-link) {
   max-width: none;          /* full column width: justified text lines up with the rules */
   margin: 0;
   color: var(--muted);
+}
+.home-principle .principle-link,
+.feature-card .feature-more {
+  margin: 0.85rem 0 0;
+  font-size: max(var(--min-text), calc(0.85rem * var(--text-scale)));
+  font-style: italic;
+  text-align: left;
+}
+.principle-link a,
+.feature-more a {
+  text-decoration: none;
+}
+.principle-link a:hover,
+.feature-more a:hover {
+  text-decoration: underline;
 }
 .home-feature,
 .home-recent {
@@ -539,6 +563,7 @@ main,
   margin-bottom: 0.8rem;
 }
 .section-heading > span,
+.section-heading > time,
 .section-heading > a {
   font-size: max(var(--min-text), calc(0.82rem * var(--text-scale)));
   color: var(--muted);
@@ -584,6 +609,9 @@ main,
   color: var(--muted);
   font-size: max(var(--min-text), calc(0.85rem * var(--text-scale)));
   font-style: italic;
+}
+.feature-meta a {
+  color: var(--muted);
 }
 .article-list {
   border-top: 1px solid var(--rule-strong);
@@ -631,6 +659,10 @@ main,
 }
 .home-footer-note p {
   margin: 0 0 0.45rem;
+}
+/* The links line is short: keep it flush left rather than justified */
+.home-footer-note p:last-child {
+  text-align: left;
 }
 .home-footer-note a {
   color: var(--muted);
@@ -680,12 +712,15 @@ ol.field-list-numbered li {
   overflow-wrap: anywhere;
 }
 
-/* ---- section headings (style: section — value is the heading) ---- */
-.section-heading {
+/* ---- section headings (style: section — value is the heading) ----
+   Scoped to article and static pages. Unscoped, this block overrode the
+   homepage's "Latest" / "Recent" header row, which shares the class name. */
+.base-frame .section-heading,
+.prose-page .section-heading {
+  display: block;
   max-width: var(--measure);
   margin: 2rem 0 0.85rem;
   padding: 0;
-  font-size: max(var(--min-text), calc(1.15rem * var(--heading-scale) / 0.65 * 0.9));
   font-size: max(var(--min-text), calc(1.05rem * var(--text-scale)));
   font-weight: 600;
   line-height: 1.35;
