@@ -732,3 +732,20 @@ ol.field-list-numbered li {
 .schema-section > .section-heading:first-child {
   margin-top: 0.25rem;
 }
+
+/* ---- article titles in listings: justified, like the article page title ----
+   Homepage feature, recent-articles rows and the issue table of contents.
+   No hyphenation, so titles never break mid-word. */
+.feature-card h2,
+.article-row h2,
+.toc-item a {
+  text-align: justify;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+.feature-card h2 {
+  max-width: none;   /* full width so justified lines meet the card edge */
+}
+.toc-item a {
+  display: block;    /* inline links cannot be justified */
+}
