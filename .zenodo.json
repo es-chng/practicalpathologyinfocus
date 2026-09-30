@@ -1,0 +1,25 @@
+{
+  "title": "Scholar Schema: a structured academic publishing system",
+  "description": "<p>Scholar Schema is a structured academic publishing system for microjournals, journal club records and other structured academic writing. A base schema holds the fields every article shares; each article schema builds on it and adds type-specific fields. Articles are written in Markdown and checked against their schemas; the system builds each article's web page, a matching PDF with its own page count, and its entry in an issue. Issues collect published articles automatically, article schemas are locked once used by a published article, and an optional workflow gives each published article a Zenodo DOI, with a sandbox mode for testing. Built with Jekyll, Python (ReportLab) and GitHub Actions; published on GitHub Pages. Designed and specified by the author; implemented with AI-assisted programming under the author's direction.</p>",
+  "creators": [
+    {
+      "name": "Ch'ng, Ewe Seng",
+      "affiliation": "Universiti Sains Malaysia"
+    }
+  ],
+  "keywords": [
+    "microjournal",
+    "structured academic writing",
+    "journal club",
+    "schema-driven publishing",
+    "Jekyll",
+    "GitHub Pages",
+    "PDF generation",
+    "Zenodo",
+    "DOI"
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open",
+  "version": "1.0.0"
+}

@@ -1,0 +1,69 @@
+---
+layout: null
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Volume {{ page.volume }}, Issue {{ page.issue }} · {{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+</head>
+<body>
+{% include site-header.html %}
+<div class="base-frame">
+  <p class="base-badge">Volume {{ page.volume }}, Issue {{ page.issue }}</p>
+  <h1>{{ page.theme }}</h1>
+  <p class="base-date">Published {{ page.published_date | date: "%-d %B %Y" }}</p>
+
+  {%- comment -%}
+    Issue introduction: whatever is written below the front matter in the
+    issue's .md file. Left out entirely if the file has no body.
+  {%- endcomment -%}
+  {%- assign issue_intro = content | strip -%}
+  {%- if issue_intro != "" %}
+  <section class="issue-intro" aria-label="About this issue">
+    {{ content }}
+  </section>
+  {%- endif %}
+
+  {%- comment -%}
+    STEP 7: the one deliberate seam between the base layer and schema layer.
+    For each article in this issue: show base fields (title, authors, PDF page count),
+    plus exactly the ONE field the article's schema nominated as its teaser.
+    No other schema field is ever read here.
+  {%- endcomment -%}
+
+  <ol class="issue-toc">
+    {%- comment -%} Only articles marked status: published are collected into the issue. {%- endcomment -%}
+    {%- assign articles_in_issue = site.articles | where: "volume", page.volume | where: "issue", page.issue | where: "status", "published" | sort: "order" -%}
+    {%- for article in articles_in_issue -%}
+      {%- assign schema = site.data[article.schema] -%}
+      {%- assign teaser_field = nil -%}
+      {%- if schema -%}
+        {%- for f in schema.fields -%}{%- if f.teaser -%}{%- assign teaser_field = f -%}{%- endif -%}{%- endfor -%}
+      {%- endif -%}
+      <li class="toc-item">
+        <a href="{{ article.url | relative_url }}">{{ article.title }}</a>
+        <p class="toc-meta">
+          {%- for a in article.authors -%}{{ a.given }} {{ a.family }}{% unless forloop.last %}, {% endunless %}{%- endfor -%}
+          {%- assign art_slug = article.name | remove: article.ext -%}
+          {%- assign n_pages = site.data['pdf-pages'][art_slug] -%}
+          {%- if n_pages == 1 %} · 1 page{% elsif n_pages %} · {{ n_pages }} pages{% endif -%}
+        </p>
+        {%- if teaser_field -%}
+          {%- assign teaser_value = article[teaser_field.key] -%}
+          {%- if teaser_value -%}
+            <p class="toc-teaser">{{ teaser_value }}</p>
+          {%- else -%}
+            <p class="toc-teaser toc-teaser-missing">[no teaser: required field "{{ teaser_field.label }}" is empty]</p>
+          {%- endif -%}
+        {%- else -%}
+          <p class="toc-teaser toc-teaser-missing">[no teaser: this article's schema declares no teaser field]</p>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ol>
+</div>
+</body>
+</html>

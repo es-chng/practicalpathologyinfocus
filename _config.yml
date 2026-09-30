@@ -1,0 +1,45 @@
+# ---------------------------------------------------------------------------
+# Your publication. Edit these values; every page reads them from here.
+# ---------------------------------------------------------------------------
+title: Practical Pathology in Focus
+tagline: A single-author microjournal
+description: >-
+  Short, focused articles on practical questions, each separating the
+  evidence from the author's interpretation and personal view.
+
+# Homepage text (shown under "The premise" and at the foot of the homepage)
+premise_lead: "One question per article."
+premise_text: >-
+  Each article asks one practical question, names the sources behind the
+  answer, and keeps the evidence, the recommendation, and the author's own
+  view clearly apart.
+publication_note: >-
+  A single-author, non-peer-reviewed publication.
+
+# Web address. For https://USERNAME.github.io/REPOSITORY/ the build sets the
+# sub-path automatically; only change url to your own GitHub address.
+url: "https://es-chng.github.io"
+baseurl: "/anatomicpathologyinfocus"
+
+# ---------------------------------------------------------------------------
+# Engine settings. No need to change anything below.
+# ---------------------------------------------------------------------------
+collections:
+  issues:
+    output: true
+    permalink: /issues/:name/
+  articles:
+    output: true
+    permalink: /articles/:name/
+defaults:
+  - scope: { path: "", type: articles }
+    values: { layout: article }
+  - scope: { path: "", type: issues }
+    values: { layout: issue }
+exclude:
+  - README.md
+  - LICENSE
+  - CITATION.cff
+  - requirements.txt
+  - scripts/
+  - .zenodo.json

@@ -1,0 +1,96 @@
+name: Deposit article PDFs to Zenodo
+
+# Run by hand: Actions -> "Deposit article PDFs to Zenodo" -> Run workflow.
+#
+#   sandbox-test     Deposits to sandbox.zenodo.org (test server). Test DOIs
+#                    (10.5072/...) go into the ledger and appear on the site,
+#                    labelled "test DOI ... not permanent". Uses the secret
+#                    ZENODO_SANDBOX_TOKEN.
+#   live             Deposits to zenodo.org. Real, permanent DOIs replace any
+#                    test DOIs. Uses the secret ZENODO_TOKEN.
+#   clear-test-dois  Removes every test DOI from the ledger. Real DOIs untouched.
+#
+# Only articles with status: published are ever deposited. After the ledger
+# changes, the site is rebuilt automatically so page and PDF show the DOI.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "What to do"
+        required: true
+        type: choice
+        default: sandbox-test
+        options:
+          - sandbox-test
+          - live
+          - clear-test-dois
+      force:
+        description: "Re-deposit even when content is unchanged"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write   # to start a site rebuild once the ledger changes
+
+concurrency:
+  group: zenodo-articles
+  cancel-in-progress: false
+
+jobs:
+  deposit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/setup-toolchain
+
+      - name: Remove test DOIs from the ledger
+        if: inputs.mode == 'clear-test-dois'
+        run: python scripts/zenodo_articles.py .pdf-out --clear-sandbox
+
+      - name: Deposit to Zenodo (reserve DOI -> embed in PDF -> upload -> publish)
+        if: inputs.mode != 'clear-test-dois'
+        env:
+          ZENODO_TOKEN: ${{ inputs.mode == 'live' && secrets.ZENODO_TOKEN || secrets.ZENODO_SANDBOX_TOKEN }}
+          ZENODO_LIVE: ${{ inputs.mode == 'live' && '1' || '' }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          if [ -z "$ZENODO_TOKEN" ]; then
+            if [ "${{ inputs.mode }}" = "live" ]; then
+              echo "::error::Secret ZENODO_TOKEN (a token from zenodo.org) is not set."
+            else
+              echo "::error::Secret ZENODO_SANDBOX_TOKEN (a token from sandbox.zenodo.org) is not set."
+            fi
+            exit 1
+          fi
+          mkdir -p .pdf-out
+          EXTRA=""
+          if [ "${{ inputs.force }}" = "true" ]; then
+            EXTRA="--force"
+          fi
+          python scripts/zenodo_articles.py .pdf-out $EXTRA
+          # PDFs made here go to Zenodo only. The website PDFs are rebuilt by
+          # pages.yml from the ledger, so page and PDF always match.
+
+      - name: Commit ledger and rebuild the site if it changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- _data/zenodo-ledger.yml 2>/dev/null; then
+            echo "Ledger unchanged -- nothing to commit, no rebuild needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add _data/zenodo-ledger.yml
+          git commit -m "chore: update Zenodo DOI ledger (${{ inputs.mode }}) [skip ci]"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          # The commit is [skip ci], so start the site build explicitly.
+          gh workflow run pages.yml --ref "${GITHUB_REF_NAME}"
+          echo "Site rebuild started: see Actions -> Validate, build and publish."

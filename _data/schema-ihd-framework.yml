@@ -1,0 +1,175 @@
+version: 1
+
+fields:
+  - key: article_type
+    label: "Article type"
+    shape: text
+    style: badge
+
+  - key: question
+    label: "Question"
+    shape: text
+    style: boxed
+
+  - key: background
+    label: "Background"
+    shape: text
+
+  - key: foundations_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+
+  - key: foundations
+    label: "Foundations: Myocardial Ischemia and Its Clinical Syndromes"
+    shape: text
+
+  - key: foundations_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: pathogenesis_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+
+  - key: pathogenesis
+    label: "Pathogenesis: Stable Versus Vulnerable Plaque"
+    shape: text
+
+  - key: pathogenesis_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: ischemic_myocardium_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+
+  - key: ischemic_myocardium
+    label: "The Ischemic Myocardium: Timing and Pattern of Necrosis"
+    shape: text
+
+  - key: ischemic_myocardium_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: morphologic_evolution_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+
+  - key: morphologic_evolution
+    label: "Morphologic Evolution and Dating of Infarction"
+    shape: text
+
+  - key: morphologic_evolution_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: reperfusion_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+
+  - key: reperfusion
+    label: "Reperfusion: Acute and Chronic Settings"
+    shape: text
+
+  - key: reperfusion_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: management_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+
+  - key: management
+    label: "Initial Management of Acute Myocardial Infarction"
+    shape: text
+
+  - key: management_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: complications_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+
+  - key: complications
+    label: "Complications of Myocardial Infarction"
+    shape: text
+
+  - key: complications_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: synthesis_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+
+  - key: synthesis
+    label: "Synthesis and Case-Based Review"
+    shape: text
+
+  - key: synthesis_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: take_home_messages
+    label: "Take-Home Messages"
+    shape: list
+
+  - key: bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    teaser: true
+    max_chars: 300
+
+  - key: conflicts_declared
+    label: "Conflicts of interest declared"
+    shape: boolean
+
+  - key: last_reviewed
+    label: "Evidence reviewed on"
+    shape: date
+
+  - key: references
+    label: "References"
+    shape: list
+    style: numbered
+    optional: true
+
+  - key: editorial_note
+    label: "Editorial note"
+    shape: text
+    visibility: editor
+    optional: true

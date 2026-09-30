@@ -1,0 +1,297 @@
+version: 1
+
+fields:
+  - key: article_type
+    label: "Article type"
+    shape: text
+    style: badge
+
+  - key: question
+    label: "Question"
+    shape: text
+    style: boxed
+
+  - key: background
+    label: "Background"
+    shape: text
+
+  - key: normal_lm_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: normal_lm
+    label: "Normal Glomeruli by Light Microscopy"
+    shape: text
+
+  - key: normal_lm_table
+    label: "Minimal Change Disease Versus Thin Basement Membrane Nephropathy"
+    shape: table
+    columns: ["feature", "mcd", "tbmn"]
+
+  - key: normal_lm_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: mesangial_only_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: mesangial_only
+    label: "Mesangial Expansion Without Nodules"
+    shape: text
+
+  - key: mesangial_only_table_1
+    label: "Branch 1 — With Immune Complex Deposits"
+    shape: table
+    columns: ["entity", "if", "em", "clue"]
+
+  - key: mesangial_only_table_2
+    label: "Branch 2 — Without Immune Complex Deposits"
+    shape: table
+    columns: ["entity", "feature"]
+
+  - key: mesangial_only_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: mesangial_endocapillary_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: mesangial_endocapillary
+    label: "Mesangial and Endocapillary Proliferation"
+    shape: text
+
+  - key: mesangial_endocapillary_table
+    label: "The Five Entities"
+    shape: table
+    columns: ["entity", "if", "em", "clue"]
+
+  - key: mesangial_endocapillary_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: membranous_pattern_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: membranous_pattern
+    label: "Membranous Pattern: Capillary Wall Thickening"
+    shape: text
+
+  - key: membranous_pattern_table
+    label: "Primary and Secondary Membranous Nephropathy"
+    shape: table
+    columns: ["entity", "if", "em", "clue"]
+
+  - key: membranous_pattern_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: mpgn_pattern_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: mpgn_pattern
+    label: "Membranoproliferative Glomerulonephritis Pattern"
+    shape: text
+
+  - key: mpgn_pattern_table
+    label: "Five Mechanistically Distinct Categories"
+    shape: table
+    columns: ["category", "diseases", "if"]
+
+  - key: mpgn_pattern_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: mpgn_if_classification_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: mpgn_if_classification
+    label: "Immunofluorescence-Based Classification of the Membranoproliferative Pattern"
+    shape: text
+
+  - key: mpgn_if_classification_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: crescentic_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: crescentic
+    label: "Crescentic Glomerulonephritis — The Master Three"
+    shape: text
+
+  - key: crescentic_table
+    label: "Three Immunopathogenic Mechanisms"
+    shape: table
+    columns: ["category", "if", "basis", "entities"]
+
+  - key: crescentic_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: fsgs_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: fsgs
+    label: "Focal Segmental Glomerulosclerosis"
+    shape: text
+
+  - key: fsgs_table
+    label: "Five Morphologic Variants"
+    shape: table
+    columns: ["variant", "etiology"]
+
+  - key: fsgs_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: nodular_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: nodular
+    label: "Nodular Mesangial Expansion — Integrated Differential Diagnosis"
+    shape: text
+
+  - key: nodular_table
+    label: "Entities Converging on Nodular Mesangial Expansion"
+    shape: table
+    columns: ["entity", "congo", "if", "em", "clue"]
+
+  - key: nodular_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: amyloid_typing_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: amyloid_typing
+    label: "Amyloid Typing: A Required Step"
+    shape: text
+
+  - key: amyloid_typing_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: unified_algorithm_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: unified_algorithm
+    label: "The Complete Unified Diagnostic Algorithm"
+    shape: list
+
+  - key: unified_algorithm_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: cross_reference_table_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: cross_reference_table_intro
+    label: "Integrated Cross-Reference Table"
+    shape: text
+
+  - key: cross_reference_table
+    label: "All Entities"
+    shape: table
+    columns: ["entity", "lm", "if", "em", "clue"]
+
+  - key: cross_reference_table_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    teaser: true
+    max_chars: 300
+
+  - key: conflicts_declared
+    label: "Conflicts of interest declared"
+    shape: boolean
+
+  - key: last_reviewed
+    label: "Evidence reviewed on"
+    shape: date
+
+  - key: references
+    label: "References"
+    shape: list
+    style: numbered
+    optional: true
+
+  - key: editorial_note
+    label: "Editorial note"
+    shape: text
+    visibility: editor
+    optional: true

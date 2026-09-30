@@ -1,0 +1,33 @@
+---
+layout: null
+title: "Issues"
+permalink: /issues/
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issues · {{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+</head>
+<body>
+{% include site-header.html %}
+<main class="prose-page">
+  <h1>Issues</h1>
+  {%- assign all_issues = site.issues | sort: "published_date" | reverse -%}
+  {%- if all_issues.size > 0 %}
+  <ul class="issue-list">
+    {%- for iss in all_issues %}
+    <li>
+      <a href="{{ iss.url | relative_url }}">Volume {{ iss.volume }}, Issue {{ iss.issue }}</a>
+      <span class="issue-list-date">{{ iss.published_date | date: "%-d %B %Y" }}{% if iss.theme %} &middot; {{ iss.theme }}{% endif %}</span>
+    </li>
+    {%- endfor %}
+  </ul>
+  {%- else %}
+  <p class="placeholder">No issues yet.</p>
+  {%- endif %}
+</main>
+</body>
+</html>

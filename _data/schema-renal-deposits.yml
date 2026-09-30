@@ -1,0 +1,237 @@
+version: 1
+
+fields:
+  - key: article_type
+    label: "Article type"
+    shape: text
+    style: badge
+
+  - key: question
+    label: "Question"
+    shape: text
+    style: boxed
+
+  - key: background
+    label: "Background"
+    shape: text
+
+  - key: filter_anatomy_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: filter_anatomy
+    label: "The Glomerular Filter and Where Deposits Sit"
+    shape: text
+
+  - key: filter_anatomy_table
+    label: "Compartments of the Glomerulus"
+    shape: table
+    columns: ["compartment", "structure", "significance"]
+
+  - key: filter_anatomy_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: reading_the_biopsy_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: reading_the_biopsy
+    label: "Reading the Biopsy: Three Techniques and Their Vocabulary"
+    shape: text
+
+  - key: reading_the_biopsy_table
+    label: "Common Descriptive Terms"
+    shape: table
+    columns: ["term", "modality", "meaning"]
+
+  - key: reading_the_biopsy_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: immune_complex_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: immune_complex
+    label: "Route 1 — Immune Complexes"
+    shape: text
+
+  - key: immune_complex_table
+    label: "Location, Route, and Consequence"
+    shape: table
+    columns: ["location", "route", "consequence", "examples"]
+
+  - key: immune_complex_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: monoclonal_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: monoclonal
+    label: "Route 2 — Monoclonal Proteins and Their Chemistry"
+    shape: text
+
+  - key: monoclonal_table
+    label: "Monoclonal Lesions by Deposit Structure"
+    shape: table
+    columns: ["structure", "lesion", "if", "em", "note"]
+
+  - key: monoclonal_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: complement_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: complement
+    label: "Route 3 — Complement Dysregulation"
+    shape: text
+
+  - key: complement_table
+    label: "C3 Glomerulopathy and Its Mimics"
+    shape: table
+    columns: ["entity", "if", "em", "clue"]
+
+  - key: complement_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: confused_terms_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: confused_terms
+    label: "Commonly Confused Terms"
+    shape: text
+
+  - key: confused_terms_table
+    label: "Terms That Sound Alike"
+    shape: table
+    columns: ["pair", "distinction"]
+
+  - key: confused_terms_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: mechanism_structure_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: mechanism_structure
+    label: "From Mechanism to Structure"
+    shape: text
+
+  - key: mechanism_structure_table
+    label: "Reading the Route From the Biopsy"
+    shape: table
+    columns: ["mechanism", "location", "if", "em", "examples"]
+
+  - key: mechanism_structure_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: detection_ladder_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: detection_ladder
+    label: "The Detection Ladder"
+    shape: list
+    style: numbered
+
+  - key: detection_ladder_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: glossary_question
+    label: "Question"
+    shape: text
+    style: boxed
+    max_chars: 250
+    optional: true
+
+  - key: glossary_intro
+    label: "Glossary"
+    shape: text
+
+  - key: glossary
+    label: "Terms"
+    shape: table
+    columns: ["term", "meaning"]
+
+  - key: glossary_bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    max_chars: 300
+
+  - key: bottom_line
+    label: "Bottom line"
+    shape: text
+    style: boxed
+    teaser: true
+    max_chars: 300
+
+  - key: conflicts_declared
+    label: "Conflicts of interest declared"
+    shape: boolean
+
+  - key: last_reviewed
+    label: "Evidence reviewed on"
+    shape: date
+
+  - key: references
+    label: "References"
+    shape: list
+    style: numbered
+    optional: true
+
+  - key: editorial_note
+    label: "Editorial note"
+    shape: text
+    visibility: editor
+    optional: true

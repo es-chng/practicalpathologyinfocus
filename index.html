@@ -1,0 +1,121 @@
+---
+layout: null
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ site.title }}</title>
+  <meta name="description" content="{{ site.description | strip }}">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+</head>
+<body>
+{% include site-header.html %}
+
+{%- comment -%}
+  The homepage deliberately uses only base article fields plus generic schema
+  metadata. It does not know the fields of any particular article schema.
+  The optional teaser and badge are discovered from the schema definition.
+{%- endcomment -%}
+{%- assign published = site.articles | where: "status", "published" | sort: "published_date" | reverse -%}
+
+<main class="home">
+  <header class="home-masthead">
+    <p class="home-kicker">{{ site.tagline }}</p>
+    <h1>{{ site.title }}</h1>
+    <p class="home-dek">{{ site.description }}</p>
+  </header>
+
+  <section class="home-principle" aria-labelledby="principle-heading">
+    <p class="section-label" id="principle-heading">The premise</p>
+    <p class="principle-lead">{{ site.premise_lead }}</p>
+    <p>{{ site.premise_text }}</p>
+  </section>
+
+  {%- if published.size > 0 -%}
+    {%- assign featured = published[0] -%}
+    {%- assign featured_schema = site.data[featured.schema] -%}
+    {%- assign featured_teaser_field = nil -%}
+    {%- assign featured_badge_field = nil -%}
+    {%- if featured_schema -%}
+      {%- for f in featured_schema.fields -%}
+        {%- if f.teaser -%}{%- assign featured_teaser_field = f -%}{%- endif -%}
+        {%- if f.style == "badge" -%}{%- assign featured_badge_field = f -%}{%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+
+    <section class="home-feature" aria-labelledby="latest-heading">
+      <div class="section-heading">
+        <p class="section-label" id="latest-heading">Latest</p>
+        <span>{{ featured.published_date | date: "%-d %B %Y" }}</span>
+      </div>
+      <article class="feature-card">
+        {%- if featured_badge_field -%}
+          {%- assign badge_value = featured[featured_badge_field.key] -%}
+          {%- if badge_value -%}<p class="article-badge">{{ badge_value }}</p>{%- endif -%}
+        {%- endif -%}
+        <h2><a href="{{ featured.url | relative_url }}">{{ featured.title }}</a></h2>
+        {%- if featured_teaser_field -%}
+          {%- assign teaser_value = featured[featured_teaser_field.key] -%}
+          {%- if teaser_value -%}<p class="feature-teaser">{{ teaser_value }}</p>{%- endif -%}
+        {%- endif -%}
+        <p class="feature-meta">
+          {%- for a in featured.authors -%}
+            {{ a.given }} {{ a.family }}{% unless forloop.last %}, {% endunless %}
+          {%- endfor -%}
+        </p>
+      </article>
+    </section>
+
+    {%- assign recent = published | slice: 1, 4 -%}
+    {%- if recent.size > 0 -%}
+      <section class="home-recent" aria-labelledby="recent-heading">
+        <div class="section-heading">
+          <p class="section-label" id="recent-heading">Recent articles</p>
+          <a href="{{ '/issues/' | relative_url }}">Browse all issues</a>
+        </div>
+        <div class="article-list">
+          {%- for article in recent -%}
+            {%- assign schema = site.data[article.schema] -%}
+            {%- assign teaser_field = nil -%}
+            {%- assign badge_field = nil -%}
+            {%- if schema -%}
+              {%- for f in schema.fields -%}
+                {%- if f.teaser -%}{%- assign teaser_field = f -%}{%- endif -%}
+                {%- if f.style == "badge" -%}{%- assign badge_field = f -%}{%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+            <article class="article-row">
+              <div class="article-row-main">
+                {%- if badge_field -%}
+                  {%- assign badge_value = article[badge_field.key] -%}
+                  {%- if badge_value -%}<p class="article-badge">{{ badge_value }}</p>{%- endif -%}
+                {%- endif -%}
+                <h2><a href="{{ article.url | relative_url }}">{{ article.title }}</a></h2>
+                {%- if teaser_field -%}
+                  {%- assign teaser_value = article[teaser_field.key] -%}
+                  {%- if teaser_value -%}<p>{{ teaser_value }}</p>{%- endif -%}
+                {%- endif -%}
+              </div>
+              <time datetime="{{ article.published_date | date: '%Y-%m-%d' }}">
+                {{ article.published_date | date: "%b %Y" }}
+              </time>
+            </article>
+          {%- endfor -%}
+        </div>
+      </section>
+    {%- endif -%}
+  {%- else -%}
+    <section class="home-empty">
+      <p>No published articles yet.</p>
+    </section>
+  {%- endif -%}
+
+  <footer class="home-footer-note">
+    <p>{{ site.publication_note }}</p>
+    <p><a href="{{ '/about/' | relative_url }}">Read about the publication →</a></p>
+  </footer>
+</main>
+</body>
+</html>

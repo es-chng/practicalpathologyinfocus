@@ -1,0 +1,6 @@
+# Python dependencies for Scholar Schema
+# Install with: pip install -r requirements.txt
+pyyaml>=6.0
+reportlab>=4.0
+requests>=2.31
+pyphen>=0.14      # hyphenation for justified two-column PDF text

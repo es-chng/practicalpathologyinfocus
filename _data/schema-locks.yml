@@ -1,0 +1,29 @@
+# Schema content locks — see scripts/validate_schema.py
+# Do not hand-edit hashes unless restoring a known-good state.
+schema-brief:
+  content_hash: 0dc4f1486651a337806be174da1574c5078ea3d38fe9ecb7ac24bb3f49b975c3
+  locked_at: '2026-09-24T12:18:23Z'
+  locked_by:
+  - PT-margin.md
+  - STAS.md
+  - de-escalate-DCIS.md
+  - whole-blood-prehospital.md
+  version: 1
+schema-ihd-framework:
+  content_hash: 4683a9b4289f56868eead4759818a715c476ba279d4addf7b6c723836fd2fdd8
+  locked_at: '2026-09-29T06:58:56Z'
+  locked_by:
+  - ihd.md
+  version: 1
+schema-renal-deposits:
+  content_hash: 7e817660bce3faef03f9374f4824819b8628356d53e87f9ffa6c0e7c016e9392
+  locked_at: '2026-09-28T10:43:44Z'
+  locked_by:
+  - renal-deposits-companion.md
+  version: 1
+schema-renal-framework:
+  content_hash: f25c9fb2e9eccc1a1dabc3442997c0e18b334fc5618ba9f420d4b1f313748a79
+  locked_at: '2026-09-28T06:43:01Z'
+  locked_by:
+  - renal.md
+  version: 1

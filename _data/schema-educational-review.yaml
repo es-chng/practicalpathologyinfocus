@@ -1,0 +1,40 @@
+article_type: educational_review
+
+structure:
+  - question
+  - background
+  - sections
+  - bottom_line
+
+blocks:
+
+  question:
+    shape: text
+    style: boxed
+
+  background:
+    shape: text
+
+  sections:
+    shape: repeat
+    item:
+      question:
+        shape: text
+        style: boxed
+        optional: true
+      text:
+        shape: text
+      tables:
+        shape: list
+        item:
+          shape: table
+          columns: dynamic
+      bottom_line:
+        shape: text
+        style: boxed
+        max_chars: 300
+
+  bottom_line:
+    shape: text
+    style: boxed
+    teaser: true
