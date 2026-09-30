@@ -19,7 +19,7 @@ publication_note: >-
 # Web address. For https://USERNAME.github.io/REPOSITORY/ the build sets the
 # sub-path automatically; only change url to your own GitHub address.
 url: "https://es-chng.github.io"
-baseurl: "/anatomicpathologyinfocus"
+baseurl: "/practicalpathologyinfocus"
 
 # ---------------------------------------------------------------------------
 # Engine settings. No need to change anything below.
