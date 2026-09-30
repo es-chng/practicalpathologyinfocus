@@ -1,35 +1,33 @@
 #!/usr/bin/env python3
 """
-Schema-aware validator: checks every article in _articles/ against the schema
-it declares, BEFORE the site is built. This is where malformed content should
-be caught -- the renderer should never have to defend against it.
+Schema-aware validator for the new structure-based schema format.
 
-Checks, generically, from the schema definition alone (no field names hardcoded):
-  - every non-optional field is present and non-empty
-  - a field's shape matches its actual YAML type (text/list/table/boolean)
-  - a field declared with max_chars is not longer than that limit
-  - exactly one field in the schema is marked as the teaser (schema-level check,
-    run once per schema file, not per article)
-  - if an article states schema_version, it must match the schema's version
-    (optional: a new version always lives in a new file, so the schema name
-    already identifies it)
-  - schemas used by published articles are content-locked (immutability)
+A schema declares:
+  version: N
+  structure: [block_name, ...]        # ordered list of top-level blocks
+  blocks:
+    block_name:
+      shape: text|list|table|boolean|date|repeat|block
+      ... shape-specific fields ...
 
-Immutability policy
--------------------
-Once an article is published, neither the article nor the schema it used may
-change in place. Format evolution = a new schema file (e.g. schema-foo-v2.yml).
-Old articles stay pinned to the locked schema. See README "Published = immutable".
+This validator walks the schema, then walks each article's front matter,
+and checks that every block and sub-block matches its declared shape.
+
+Checks:
+  - schema files are well-formed (version, structure, blocks)
+  - every block named in structure exists in blocks
+  - every repeat/block has the right sub-field container
+  - exactly one top-level block has teaser: true
+  - every article's front matter has all non-optional blocks
+  - each block's value matches its declared shape
+  - repeat blocks are lists of objects; each object is recursively validated
+  - block blocks are dicts; each named sub-field is recursively validated
+  - max_chars on text fields is respected
+  - published articles pin their schema by content hash (immutability)
 
 Usage:
   python scripts/validate_schema.py
-  python scripts/validate_schema.py --update-locks   # also remove locks nothing needs
-
-Locks are created automatically: the first time an article using a schema is
-marked published, a normal run records that schema's lock in
-_data/schema-locks.yml. On GitHub the build commits that file back itself. Only two things
-stay manual on purpose: a changed locked schema is always an error, and a lock
-is only removed with --update-locks.
+  python scripts/validate_schema.py --update-locks
 """
 from __future__ import annotations
 
@@ -38,7 +36,7 @@ import hashlib
 import pathlib
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 import yaml
 
@@ -54,15 +52,18 @@ PLACEHOLDER_DOI_PREFIXES = (
     "pending",
 )
 
-
-
-# Same rule as Jekyll: every Markdown file anywhere under _articles/, in any
-# letter case (.md, .MD, .markdown, ...). Anything else there is reported, so a
-# misnamed article is never silently skipped.
 MARKDOWN_EXTS = {".md", ".markdown", ".mkdown", ".mkdn", ".mkd"}
 
+LEAF_SHAPES = {"text", "list", "table", "boolean", "date"}
+COMPOSITE_SHAPES = {"repeat", "block"}
+VALID_SHAPES = LEAF_SHAPES | COMPOSITE_SHAPES
 
-def find_articles(root):
+
+# ---------------------------------------------------------------------------
+# Discovery
+# ---------------------------------------------------------------------------
+
+def find_articles(root: pathlib.Path):
     folder = root / "_articles"
     found, ignored = [], []
     for p in sorted(folder.rglob("*")):
@@ -70,8 +71,7 @@ def find_articles(root):
             continue
         (found if p.suffix.lower() in MARKDOWN_EXTS else ignored).append(p)
     for p in ignored:
-        print(f"WARNING  {p.relative_to(root)} is in _articles/ but is not a Markdown (.md) "
-              f"file, so it is not treated as an article")
+        print(f"WARNING  {p.relative_to(root)} is in _articles/ but is not a Markdown file")
     return found
 
 
@@ -95,11 +95,6 @@ def is_placeholder_doi(doi) -> bool:
 
 
 def is_published(fm: dict, slug: str, ledger: dict) -> bool:
-    """An article is published if explicitly marked, or has a real DOI, or is in the Zenodo ledger.
-
-    Explicit status: draft | unpublished always wins (mocks can sit in the ledger
-    from a test deposit without triggering immutability rules).
-    """
     status = str(fm.get("status") or "").strip().lower()
     if status in ("draft", "unpublished", "test"):
         return False
@@ -113,101 +108,263 @@ def is_published(fm: dict, slug: str, ledger: dict) -> bool:
     return False
 
 
-VALID_SHAPES = {"text", "list", "table", "boolean", "date"}
-VALID_STYLES = {"plain", "boxed", "opinion", "badge", "table", "numbered"}
+# ---------------------------------------------------------------------------
+# Schema-level validation
+# ---------------------------------------------------------------------------
 
+def check_schema_file(schema: dict, name: str) -> list[str]:
+    """Validate one schema file's internal consistency."""
+    errors: list[str] = []
 
-def check_schema_file(schema: dict, name: str = "?") -> list[str]:
-    """Defaults: visibility = public, style = plain (table for table fields).
-    Only key, label and shape are required on each field."""
-    errors = []
     if "version" not in schema:
-        errors.append(f"schema '{name}' is missing a top-level 'version' field")
-    for f in schema.get("fields", []):
-        k = f.get("key", "?")
-        for req in ("key", "label", "shape"):
-            if req not in f:
-                errors.append(f"schema '{name}': field '{k}' is missing '{req}'")
-        if f.get("shape") and f["shape"] not in VALID_SHAPES:
-            errors.append(f"schema '{name}': field '{k}' has unknown shape '{f['shape']}'")
-        if f.get("style") and f["style"] not in VALID_STYLES:
-            errors.append(f"schema '{name}': field '{k}' has unknown style '{f['style']}'")
-        if f.get("visibility") not in (None, "public", "editor"):
-            errors.append(f"schema '{name}': field '{k}' visibility must be public or editor")
-    teasers = [f for f in schema.get("fields", []) if f.get("teaser")]
+        errors.append(f"schema '{name}' is missing a top-level 'version'")
+
+    structure = schema.get("structure")
+    if not isinstance(structure, list) or not structure:
+        errors.append(f"schema '{name}' must declare a non-empty 'structure' list")
+        return errors  # cannot continue meaningfully
+
+    blocks = schema.get("blocks")
+    if not isinstance(blocks, dict) or not blocks:
+        errors.append(f"schema '{name}' must declare a non-empty 'blocks' mapping")
+        return errors
+
+    for block_name in structure:
+        if block_name not in blocks:
+            errors.append(
+                f"schema '{name}': structure names block '{block_name}' "
+                f"but it is not defined in blocks"
+            )
+
+    for block_name, block in blocks.items():
+        errors.extend(check_block(name, block_name, block))
+
+    teasers = [b for b in blocks.values() if b.get("teaser")]
     if len(teasers) != 1:
         errors.append(
-            f"schema '{name}' must have exactly one teaser field, found {len(teasers)}"
+            f"schema '{name}' must have exactly one block with teaser: true, "
+            f"found {len(teasers)}"
         )
+
     return errors
 
 
-def check_value_shape(field: dict, value) -> str | None:
-    shape = field["shape"]
-    if shape == "text" and not isinstance(value, str):
-        return f"'{field['key']}' is declared shape 'text' but the value is not a string"
-    if shape == "list" and not isinstance(value, list):
-        return f"'{field['key']}' is declared shape 'list' but the value is not a list"
-    if shape == "table":
-        if not isinstance(value, list) or not all(isinstance(r, dict) for r in value):
-            return f"'{field['key']}' is declared shape 'table' but the value is not a list of rows"
-        for row in value:
-            missing = [c for c in field.get("columns", []) if c not in row]
-            if missing:
-                return f"'{field['key']}' has a row missing column(s): {', '.join(missing)}"
-    if shape == "boolean" and not isinstance(value, bool):
-        return f"'{field['key']}' is declared shape 'boolean' but the value is not true/false"
-    if shape == "date":
-        import datetime as _dt
-        if isinstance(value, (_dt.date, _dt.datetime)):
-            return None
-        if isinstance(value, str) and re.match(r"^\d{4}-\d{2}-\d{2}$", value.strip()):
-            return None
-        return (f"'{field['key']}' is declared shape 'date' but the value is not a real date "
-               f"(write it unquoted, like 2026-09-01, or as a quoted YYYY-MM-DD string)")
-    return None
+def check_block(schema_name: str, path: str, block: dict) -> list[str]:
+    """Validate one block definition, recursing into repeat/block children."""
+    errors: list[str] = []
+    shape = block.get("shape")
+    if shape not in VALID_SHAPES:
+        errors.append(
+            f"schema '{schema_name}': block '{path}' has unknown shape '{shape}'"
+        )
+        return errors
 
+    if shape == "repeat":
+        item = block.get("item")
+        if not isinstance(item, dict) or not item:
+            errors.append(
+                f"schema '{schema_name}': repeat block '{path}' must declare a non-empty 'item'"
+            )
+            return errors
+        for sub_name, sub_block in item.items():
+            errors.extend(check_block(schema_name, f"{path}.{sub_name}", sub_block))
+
+    elif shape == "block":
+        fields = block.get("fields")
+        if not isinstance(fields, dict) or not fields:
+            errors.append(
+                f"schema '{schema_name}': block '{path}' must declare a non-empty 'fields'"
+            )
+            return errors
+        for sub_name, sub_block in fields.items():
+            errors.extend(check_block(schema_name, f"{path}.{sub_name}", sub_block))
+
+    elif shape == "table":
+        columns = block.get("columns")
+        if columns != "dynamic" and (not isinstance(columns, list) or not columns):
+            errors.append(
+                f"schema '{schema_name}': table block '{path}' must declare "
+                f"'columns' as a non-empty list or the string 'dynamic'"
+            )
+
+    elif shape == "list":
+        item = block.get("item")
+        if item is not None:
+            errors.extend(check_block(schema_name, f"{path}[item]", item))
+
+    return errors
+
+
+# ---------------------------------------------------------------------------
+# Article-level validation
+# ---------------------------------------------------------------------------
 
 def check_article(path: pathlib.Path, schemas: dict, ledger: dict) -> list[str]:
-    fm = load_front_matter(path)
-    errors = []
-    slug = path.stem
+    try:
+        fm = load_front_matter(path)
+    except Exception as e:
+        return [f"cannot read front matter: {e}"]
+
     schema_name = fm.get("schema")
     if not schema_name:
-        return errors  # base-only article is valid
+        return []  # base-only article is valid
 
     schema = schemas.get(schema_name)
     if not schema:
         return [f"references unknown schema '{schema_name}'"]
 
-    # Optional pin: if the article states schema_version, it must match.
+    errors: list[str] = []
+
+    # Optional schema_version pin
     schema_ver = schema.get("version")
     article_ver = fm.get("schema_version")
     if article_ver is not None and schema_ver is not None and article_ver != schema_ver:
         errors.append(
-            f"schema_version {article_ver!r} does not match schema '{schema_name}' version {schema_ver!r} "
-            f"-- use a new schema file for a new version (or delete the schema_version line)"
+            f"schema_version {article_ver!r} does not match schema '{schema_name}' "
+            f"version {schema_ver!r}"
         )
 
-    for field in schema.get("fields", []):
-        key = field["key"]
-        value = fm.get(key)
-        empty = value is None or value == "" or value == []
-        if empty:
-            if not field.get("optional"):
-                errors.append(f"required field '{key}' ({field['label']}) is missing or empty")
-            continue
-        shape_error = check_value_shape(field, value)
-        if shape_error:
-            errors.append(shape_error)
-        max_chars = field.get("max_chars")
-        if max_chars and isinstance(value, str) and len(value) > max_chars:
-            errors.append(
-                f"'{key}' ({field['label']}) is {len(value)} characters, over its {max_chars}-character limit "
-                f"-- this field is the schema's teaser, so it must stay short enough to stand alone in a listing"
-            )
+    structure = schema.get("structure") or []
+    blocks = schema.get("blocks") or {}
+
+    for block_name in structure:
+        block = blocks.get(block_name)
+        if block is None:
+            continue  # already reported at schema level
+        value = fm.get(block_name)
+        errors.extend(
+            check_value(schema_name, block_name, block, value, path=fm)
+        )
+
     return errors
 
+
+def check_value(schema_name: str, path: str, block: dict, value, fm: dict) -> list[str]:
+    """Recursively check one value against its block definition."""
+    errors: list[str] = []
+    shape = block.get("shape")
+    optional = block.get("optional", False)
+
+    empty = value is None or value == "" or value == []
+    if empty:
+        if not optional:
+            label = block.get("label", path)
+            errors.append(f"required block '{path}' ({label}) is missing or empty")
+        return errors
+
+    if shape == "text":
+        if not isinstance(value, str):
+            errors.append(f"'{path}' is declared text but value is not a string")
+            return errors
+        max_chars = block.get("max_chars")
+        if max_chars and len(value) > max_chars:
+            errors.append(
+                f"'{path}' is {len(value)} characters, over its {max_chars}-character limit"
+            )
+
+    elif shape == "list":
+        if not isinstance(value, list):
+            errors.append(f"'{path}' is declared list but value is not a list")
+            return errors
+        item_def = block.get("item")
+        if item_def is not None:
+            for i, item in enumerate(value):
+                errors.extend(check_value(schema_name, f"{path}[{i}]", item_def, item, fm))
+
+    elif shape == "table":
+        if not isinstance(value, list):
+            errors.append(f"'{path}' is declared table but value is not a list")
+            return errors
+        # Two allowed table shapes:
+        #   (a) list of dicts, each with the declared columns
+        #   (b) list of {label, columns, rows} wrapper objects (dynamic columns)
+        columns = block.get("columns")
+        if columns == "dynamic":
+            for i, t in enumerate(value):
+                if not isinstance(t, dict):
+                    errors.append(f"'{path}[{i}]' must be an object with label/columns/rows")
+                    continue
+                for key in ("label", "columns", "rows"):
+                    if key not in t:
+                        errors.append(f"'{path}[{i}]' is missing '{key}'")
+                if isinstance(t.get("columns"), list) and isinstance(t.get("rows"), list):
+                    for j, row in enumerate(t["rows"]):
+                        if not isinstance(row, dict):
+                            errors.append(f"'{path}[{i}].rows[{j}]' must be an object")
+                            continue
+                        missing = [c for c in t["columns"] if c not in row]
+                        if missing:
+                            errors.append(
+                                f"'{path}[{i}].rows[{j}]' missing column(s): "
+                                f"{', '.join(missing)}"
+                            )
+        else:
+            for i, row in enumerate(value):
+                if not isinstance(row, dict):
+                    errors.append(f"'{path}[{i}]' must be an object")
+                    continue
+                missing = [c for c in (columns or []) if c not in row]
+                if missing:
+                    errors.append(
+                        f"'{path}[{i}]' missing column(s): {', '.join(missing)}"
+                    )
+
+    elif shape == "boolean":
+        if not isinstance(value, bool):
+            errors.append(f"'{path}' is declared boolean but value is not true/false")
+
+    elif shape == "date":
+        if isinstance(value, (date, datetime)):
+            pass
+        elif isinstance(value, str) and re.match(r"^\d{4}-\d{2}-\d{2}$", value.strip()):
+            pass
+        else:
+            errors.append(
+                f"'{path}' is declared date but value is not a real date "
+                f"(use unquoted YYYY-MM-DD or a quoted YYYY-MM-DD string)"
+            )
+
+    elif shape == "repeat":
+        if not isinstance(value, list):
+            errors.append(f"'{path}' is declared repeat but value is not a list")
+            return errors
+        item_def = block.get("item") or {}
+        for i, item in enumerate(value):
+            if not isinstance(item, dict):
+                errors.append(f"'{path}[{i}]' must be an object")
+                continue
+            for sub_name, sub_block in item_def.items():
+                errors.extend(
+                    check_value(
+                        schema_name,
+                        f"{path}[{i}].{sub_name}",
+                        sub_block,
+                        item.get(sub_name),
+                        fm,
+                    )
+                )
+
+    elif shape == "block":
+        if not isinstance(value, dict):
+            errors.append(f"'{path}' is declared block but value is not an object")
+            return errors
+        for sub_name, sub_block in (block.get("fields") or {}).items():
+            errors.extend(
+                check_value(
+                    schema_name,
+                    f"{path}.{sub_name}",
+                    sub_block,
+                    value.get(sub_name),
+                    fm,
+                )
+            )
+
+    return errors
+
+
+# ---------------------------------------------------------------------------
+# Locks / ledger
+# ---------------------------------------------------------------------------
 
 def load_locks() -> dict:
     if LOCKS_PATH.is_file():
@@ -223,23 +380,14 @@ def load_ledger() -> dict:
     return {}
 
 
-def check_schema_locks(
-    schema_paths: dict[str, pathlib.Path],
-    schemas: dict,
-    articles: list[pathlib.Path],
-    ledger: dict,
-    locks: dict,
-    update_locks: bool,
-) -> tuple[list[str], dict]:
-    """
-    Enforce schema content immutability for schemas used by published articles.
-    Returns (errors, updated_locks).
-    """
-    errors = []
-    # Which schemas are used by at least one published article?
+def check_schema_locks(schema_paths, schemas, articles, ledger, locks, update_locks):
+    errors: list[str] = []
     published_schemas: dict[str, list[str]] = {}
     for p in articles:
-        fm = load_front_matter(p)
+        try:
+            fm = load_front_matter(p)
+        except Exception:
+            continue
         if not is_published(fm, p.stem, ledger):
             continue
         name = fm.get("schema")
@@ -249,11 +397,6 @@ def check_schema_locks(
     new_locks = dict(locks)
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    # A lock is only meaningful while at least one published article still
-    # uses that schema. If every article that earned a schema its lock is
-    # later reverted to draft or removed, the lock must be prunable -- a
-    # schema that can never become editable again, even after nothing
-    # published depends on it, is a bug, not a safety feature.
     if update_locks:
         stale = [name for name in new_locks if name not in published_schemas]
         for name in stale:
@@ -270,9 +413,6 @@ def check_schema_locks(
         lock = locks.get(schema_name)
 
         if lock is None:
-            # First published article on this schema -> lock it automatically.
-            # Creating a lock is always safe: it only records the schema as it is
-            # now. On GitHub, pages.yml commits the updated lock file back.
             new_locks[schema_name] = {
                 "version": schema.get("version"),
                 "content_hash": current_hash,
@@ -286,15 +426,11 @@ def check_schema_locks(
         if locked_hash and locked_hash != current_hash:
             errors.append(
                 f"schema '{schema_name}' has changed since it was locked "
-                f"(locked hash {str(locked_hash)[:12]}…, current {current_hash[:12]}…). "
-                f"Published articles must not have their schema amended in place. "
-                f"Create a new schema file (e.g. {schema_name}-v2) for format changes, "
-                f"or restore the locked content. "
+                f"(locked {str(locked_hash)[:12]}…, current {current_hash[:12]}…). "
+                f"Create a new schema file for format changes, or restore the locked content. "
                 f"Articles holding the lock: {', '.join(lock.get('locked_by') or article_names)}"
             )
         else:
-            # Hash unchanged: keep the list of articles holding the lock current
-            # (e.g. after an article is added or renamed). Metadata only.
             new_locks[schema_name] = {
                 **lock,
                 "version": schema.get("version"),
@@ -304,13 +440,13 @@ def check_schema_locks(
     return errors, new_locks
 
 
+# ---------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate articles against schemas")
-    parser.add_argument(
-        "--update-locks",
-        action="store_true",
-        help="Write/refresh _data/schema-locks.yml for schemas used by published articles",
-    )
+    parser.add_argument("--update-locks", action="store_true")
     args = parser.parse_args()
 
     schema_paths: dict[str, pathlib.Path] = {}
@@ -342,7 +478,6 @@ def main() -> int:
 
     if args.update_locks or new_locks != locks:
         LOCKS_PATH.parent.mkdir(parents=True, exist_ok=True)
-        # Preserve header comment style
         body = yaml.dump(new_locks, default_flow_style=False, sort_keys=True, allow_unicode=True)
         LOCKS_PATH.write_text(
             "# Schema content locks — see scripts/validate_schema.py\n"
@@ -353,8 +488,7 @@ def main() -> int:
         print(f"Wrote {LOCKS_PATH.relative_to(ROOT)}")
 
     for p in articles:
-        errors = check_article(p, schemas, ledger)
-        for e in errors:
+        for e in check_article(p, schemas, ledger):
             print(f"ERROR  {p.name}: {e}")
             total_errors += 1
 
