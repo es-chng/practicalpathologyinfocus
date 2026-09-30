@@ -10,33 +10,46 @@ structure:
 blocks:
 
   question:
+    label: "Question"
     shape: text
     style: boxed
 
   background:
+    label: "Background"
     shape: text
 
   sections:
+    label: "Sections"
     shape: repeat
+    item_order:
+      - question
+      - text
+      - tables
+      - bottom_line
     item:
       question:
+        label: "Question"
         shape: text
         style: boxed
         optional: true
       text:
+        label: "Text"
         shape: text
       tables:
+        label: "Tables"
         shape: list
         optional: true
         item:
           shape: table
           columns: dynamic
       bottom_line:
+        label: "Bottom line"
         shape: text
         style: boxed
         max_chars: 300
 
   bottom_line:
+    label: "Bottom line"
     shape: text
     style: boxed
     teaser: true
