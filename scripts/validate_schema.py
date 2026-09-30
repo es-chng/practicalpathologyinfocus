@@ -323,36 +323,45 @@ def check_value(schema_name: str, path: str, block: dict, value) -> list[str]:
                 )
 
     elif shape == "table":
-        if not isinstance(value, list):
-            errors.append(f"'{path}' is declared table but value is not a list")
-            return errors
         columns = block.get("columns")
+
         if columns == "dynamic":
-            # Wrapper objects: {label, columns, rows}
-            for i, t in enumerate(value):
-                if not isinstance(t, dict):
-                    errors.append(
-                        f"'{path}[{i}]' must be an object with label/columns/rows"
-                    )
-                    continue
-                for key in ("label", "columns", "rows"):
-                    if key not in t:
-                        errors.append(f"'{path}[{i}]' is missing '{key}'")
-                tcols = t.get("columns")
-                trows = t.get("rows")
-                if isinstance(tcols, list) and isinstance(trows, list):
-                    for j, row in enumerate(trows):
-                        if not isinstance(row, dict):
-                            errors.append(f"'{path}[{i}].rows[{j}]' must be an object")
-                            continue
-                        missing = [c for c in tcols if c not in row]
-                        if missing:
-                            errors.append(
-                                f"'{path}[{i}].rows[{j}]' missing column(s): "
-                                f"{', '.join(missing)}"
-                            )
+            # One wrapper object: {label, columns, rows}
+            if not isinstance(value, dict):
+                errors.append(
+                    f"'{path}' is declared a dynamic table but value is not an object "
+                    f"with label/columns/rows"
+                )
+                return errors
+
+            for key in ("label", "columns", "rows"):
+                if key not in value:
+                    errors.append(f"'{path}' is missing '{key}'")
+
+            tcols = value.get("columns")
+            trows = value.get("rows")
+
+            if not isinstance(tcols, list) or not tcols:
+                errors.append(f"'{path}.columns' must be a non-empty list")
+            if not isinstance(trows, list):
+                errors.append(f"'{path}.rows' must be a list")
+
+            if isinstance(tcols, list) and isinstance(trows, list):
+                for j, row in enumerate(trows):
+                    if not isinstance(row, dict):
+                        errors.append(f"'{path}.rows[{j}]' must be an object")
+                        continue
+                    missing = [c for c in tcols if c not in row]
+                    if missing:
+                        errors.append(
+                            f"'{path}.rows[{j}]' missing column(s): {', '.join(missing)}"
+                        )
+
         else:
-            # Fixed columns: list of row dicts
+            # Fixed columns: value is a list of row dicts
+            if not isinstance(value, list):
+                errors.append(f"'{path}' is declared table but value is not a list")
+                return errors
             for i, row in enumerate(value):
                 if not isinstance(row, dict):
                     errors.append(f"'{path}[{i}]' must be an object")
