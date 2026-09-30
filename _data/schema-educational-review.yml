@@ -27,6 +27,7 @@ blocks:
         shape: text
       tables:
         shape: list
+        optional: true
         item:
           shape: table
           columns: dynamic
