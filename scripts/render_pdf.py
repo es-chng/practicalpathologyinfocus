@@ -18,7 +18,7 @@ from reportlab.lib.enums import TA_JUSTIFY
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
-from reportlab.platypus import HRFlowable, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import HRFlowable, KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from xml.sax.saxutils import escape
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -123,8 +123,257 @@ def load_article(path):
     return yaml.safe_load(FM_RE.match(text).group(1))
 
 
+
 def load_schema(name):
     return yaml.safe_load((ROOT / "_data" / f"{name}.yml").read_text())
+
+
+# ---------------------------------------------------------------------------
+# Lightweight Markdown -> ReportLab flowables (no extra dependency)
+# Supports: paragraphs, **bold**, *italic*, pipe tables, blank-line breaks.
+# ---------------------------------------------------------------------------
+
+_BOLD_RE = re.compile(r"\*\*(.+?)\*\*")
+_ITAL_RE = re.compile(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)")
+
+
+def _inline_md(text: str) -> str:
+    """Escape HTML then apply a tiny Markdown inline subset to ReportLab XML."""
+    s = escape(str(text))
+    s = _BOLD_RE.sub(r"<b>\1</b>", s)
+    s = _ITAL_RE.sub(r"<i>\1</i>", s)
+    return s
+
+
+def _is_table_row(line: str) -> bool:
+    s = line.strip()
+    return s.startswith("|") and s.endswith("|") and s.count("|") >= 2
+
+
+def _is_sep_row(line: str) -> bool:
+    s = line.strip().strip("|").replace(":", "").replace("-", "").replace("|", "").replace(" ", "")
+    return _is_table_row(line) and s == ""
+
+
+def _parse_row(line: str) -> list[str]:
+    parts = [c.strip() for c in line.strip().strip("|").split("|")]
+    return parts
+
+
+def md_to_flowables(text, para_style, cell_style=None, cellhead_style=None,
+                    caption_style=None, table_font="Helvetica", table_size=8.3,
+                    subhead_style=None):
+    """
+    Convert a Markdown string into a list of (kind, flowable) pairs.
+      kind "col"  -> flows in the two-column body
+      kind "full" -> spans the page (tables, standalone **subheadings**)
+
+    Standalone bold lines (**Title**) are treated as subheadings and kept
+    full-width so they stay visually attached to a following table.
+    """
+    if text is None:
+        return []
+    raw = str(text).replace("\r\n", "\n").replace("\r", "\n")
+    lines = raw.split("\n")
+    out = []
+    i = 0
+    para_buf = []
+
+    def flush_para():
+        nonlocal para_buf
+        if not para_buf:
+            return
+        body = " ".join(l.strip() for l in para_buf if l.strip())
+        para_buf = []
+        if body:
+            out.append(("col", Paragraph(_inline_md(body), para_style)))
+
+    # A line that is only **something** (optional whitespace) is a subheading
+    subhead_re = re.compile(r"^\s*\*\*(.+?)\*\*\s*$")
+
+    while i < len(lines):
+        line = lines[i]
+
+        # --- standalone subheading ---
+        m = subhead_re.match(line)
+        if m and not _is_table_row(line):
+            flush_para()
+            title = m.group(1).strip()
+            style = subhead_style or para_style
+            head_fl = Paragraph(_inline_md(title), style)
+            i += 1
+            # Skip blank lines after the subheading
+            while i < len(lines) and lines[i].strip() == "":
+                i += 1
+            # If a markdown table follows immediately, keep heading + table together
+            if i < len(lines) and _is_table_row(lines[i]):
+                tlines = []
+                while i < len(lines) and (_is_table_row(lines[i]) or lines[i].strip() == ""):
+                    if lines[i].strip() == "":
+                        if i + 1 < len(lines) and _is_table_row(lines[i + 1]):
+                            i += 1
+                            continue
+                        break
+                    tlines.append(lines[i])
+                    i += 1
+                rows = [_parse_row(r) for r in tlines if not _is_sep_row(r)]
+                if rows:
+                    header = rows[0]
+                    body_rows = rows[1:]
+                    ncols = len(header)
+                    def pad(r, n=ncols):
+                        r = list(r) + [""] * max(0, n - len(r))
+                        return r[:n]
+                    header = pad(header)
+                    body_rows = [pad(r) for r in body_rows]
+                    ch = cellhead_style or para_style
+                    cs = cell_style or para_style
+                    data = [[Paragraph(_inline_md(c), ch) for c in header]]
+                    data += [[Paragraph(_inline_md(c), cs) for c in r] for r in body_rows]
+                    col_keys = [f"c{n}" for n in range(ncols)]
+                    fake_rows = [{col_keys[j]: body_rows[ri][j] for j in range(ncols)}
+                                 for ri in range(len(body_rows))]
+                    widths = compute_col_widths(col_keys, fake_rows, font=table_font, size=table_size)
+                    from reportlab.lib import colors as _colors
+                    t = Table(data, repeatRows=1, hAlign="LEFT", colWidths=widths)
+                    t.setStyle(TableStyle([
+                        ("LINEABOVE", (0, 0), (-1, 0), 1.0, _colors.HexColor("#3a3a3a")),
+                        ("LINEBELOW", (0, 0), (-1, 0), 0.5, _colors.HexColor("#3a3a3a")),
+                        ("LINEBELOW", (0, 1), (-1, -2), 0.3, _colors.HexColor("#c9c5bc")),
+                        ("LINEBELOW", (0, -1), (-1, -1), 1.0, _colors.HexColor("#3a3a3a")),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+                        ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ]))
+                    out.append(("full", KeepTogether([head_fl, Spacer(1, 4), t])))
+                    out.append(("full", Spacer(1, 8)))
+                    continue
+            # No table follows: full-width subheading alone
+            out.append(("full", head_fl))
+            out.append(("full", Spacer(1, 4)))
+            continue
+
+        if _is_table_row(line):
+            flush_para()
+            tlines = []
+            while i < len(lines) and (_is_table_row(lines[i]) or lines[i].strip() == ""):
+                if lines[i].strip() == "":
+                    if i + 1 < len(lines) and _is_table_row(lines[i + 1]):
+                        i += 1
+                        continue
+                    break
+                tlines.append(lines[i])
+                i += 1
+            rows = [_parse_row(r) for r in tlines if not _is_sep_row(r)]
+            if not rows:
+                continue
+            header = rows[0]
+            body_rows = rows[1:]
+            ncols = len(header)
+            def pad(r, n=ncols):
+                r = list(r) + [""] * max(0, n - len(r))
+                return r[:n]
+            header = pad(header)
+            body_rows = [pad(r) for r in body_rows]
+            ch = cellhead_style or para_style
+            cs = cell_style or para_style
+            data = [[Paragraph(_inline_md(c), ch) for c in header]]
+            data += [[Paragraph(_inline_md(c), cs) for c in r] for r in body_rows]
+            col_keys = [f"c{n}" for n in range(ncols)]
+            fake_rows = [{col_keys[j]: body_rows[i][j] for j in range(ncols)}
+                         for i in range(len(body_rows))]
+            widths = compute_col_widths(col_keys, fake_rows, font=table_font, size=table_size)
+            from reportlab.lib import colors as _colors
+            t = Table(data, repeatRows=1, hAlign="LEFT", colWidths=widths)
+            t.setStyle(TableStyle([
+                ("LINEABOVE", (0, 0), (-1, 0), 1.0, _colors.HexColor("#3a3a3a")),
+                ("LINEBELOW", (0, 0), (-1, 0), 0.5, _colors.HexColor("#3a3a3a")),
+                ("LINEBELOW", (0, 1), (-1, -2), 0.3, _colors.HexColor("#c9c5bc")),
+                ("LINEBELOW", (0, -1), (-1, -1), 1.0, _colors.HexColor("#3a3a3a")),
+                ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+                ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ]))
+            out.append(("full", t))
+            out.append(("full", Spacer(1, 8)))
+            continue
+
+        if line.strip() == "":
+            flush_para()
+            i += 1
+            continue
+        para_buf.append(line)
+        i += 1
+    flush_para()
+    return out
+
+
+
+
+def _promote_pre_table_cols(pieces, max_chars=220):
+    """
+    Promote consecutive "col" pieces that sit immediately before a "full"
+    piece (table/subhead) to full-width ONLY when that run is short.
+
+    Long body prose stays two-column; a one-line intro above a table does not
+    leave a blank second column.
+    """
+    if not pieces:
+        return pieces
+
+    def _chars(fl):
+        # Best-effort character count from a Paragraph or nested flowable
+        try:
+            t = getattr(fl, 'text', None) or getattr(fl, 'plain', None)
+            if t:
+                return len(re.sub(r'<[^>]+>', '', str(t)))
+        except Exception:
+            pass
+        return 80  # unknown flowable: treat as moderate
+
+    out = []
+    i = 0
+    n = len(pieces)
+    while i < n:
+        kind, fl = pieces[i]
+        if kind != "col":
+            out.append(pieces[i])
+            i += 1
+            continue
+        j = i
+        cols = []
+        while j < n and pieces[j][0] == "col":
+            cols.append(pieces[j][1])
+            j += 1
+        k = j
+        while k < n and pieces[k][0] == "full" and isinstance(pieces[k][1], Spacer):
+            k += 1
+        follows_full = k < n and pieces[k][0] == "full"
+        total = sum(_chars(c) for c in cols)
+        # Short run before a table/subhead -> full width; otherwise keep columns
+        if follows_full and total <= max_chars:
+            for c in cols:
+                out.append(("full", c))
+        else:
+            for c in cols:
+                out.append(("col", c))
+        i = j
+    return out
+
+
+
+def _human_label(name: str) -> str:
+    return (name or "").replace("_", " ").strip().capitalize()
+
+
+def _block_order(block: dict, order_key: str, map_key: str) -> list:
+    """Return ordered sub-block names from item_order/field_order or map keys."""
+    order = block.get(order_key)
+    if isinstance(order, list) and order:
+        return order
+    mapping = block.get(map_key) or {}
+    return list(mapping.keys())
+
 
 
 # Page geometry (A4). Body text is set in two columns; tables span both.
@@ -284,14 +533,21 @@ def _render(article_path, out_path, doi_override=None, page_count=None):
                                 textColor=INK, spaceBefore=6, spaceAfter=2),
         "error": ParagraphStyle("error", fontName=f["italic"], fontSize=9, leading=12,
                                 textColor=MUTED),
+        "section": ParagraphStyle("section", fontName=f["bold"], fontSize=11, leading=14,
+                                  textColor=INK, spaceBefore=10, spaceAfter=6),
+        "subhead": ParagraphStyle("subhead", fontName=f["sans_bold"], fontSize=9, leading=11.5,
+                                 textColor=INK, spaceBefore=8, spaceAfter=3),
     }
 
     # ---------------- full-width front matter (page 1) ----------------
     front = []
-    schema = load_schema(article["schema"]) if article.get("schema") else {"fields": []}
-    fields = [fl for fl in schema.get("fields", []) if fl.get("visibility") != "editor"]
-    kickers = [str(article.get(fl["key"])) for fl in fields
-               if fl.get("style") == "badge" and article.get(fl["key"])]
+    schema = load_schema(article["schema"]) if article.get("schema") else {}
+    # Badge-style leaf blocks (if any) become the kicker above the title
+    kickers = []
+    for bname in schema.get("structure") or []:
+        bdef = (schema.get("blocks") or {}).get(bname) or {}
+        if bdef.get("style") == "badge" and article.get(bname):
+            kickers.append(str(article[bname]))
     if kickers:
         front.append(Paragraph(escape(" · ".join(kickers)).upper(), st["kicker"]))
     front.append(Paragraph(escape(article["title"]), st["title"]))
@@ -304,7 +560,11 @@ def _render(article_path, out_path, doi_override=None, page_count=None):
     for a in article["authors"]:
         name = escape(f"{a['given']} {a['family']}")
         if len(affs) > 1 and a.get("affiliation"):
-            name += f"<super>{affs.index(a['affiliation']) + 1}</super>"
+            try:
+                idx = affs.index(a["affiliation"]) + 1
+                name += f"<super>{idx}</super>"
+            except ValueError:
+                pass
         parts.append(name)
     front.append(Paragraph(", ".join(parts), st["authors"]))
     for i, af in enumerate(affs, 1):
@@ -312,16 +572,15 @@ def _render(article_path, out_path, doi_override=None, page_count=None):
         front.append(Paragraph(prefix + escape(af), st["affil"]))
     front.append(HRFlowable(width="100%", thickness=0.8, color=RULE_STRONG, spaceBefore=9, spaceAfter=4))
 
-    # ---------------- schema-driven body ----------------
-    # Each field becomes one block: ("col", flowables) set in the columns, or
-    # ("full", flowables) spanning the page. Consecutive column blocks are
-    # poured into one two-column BalancedColumns section.
+    # ---------------- schema-driven body (structure / blocks) ----------------
+    # Each emitted unit is ("col", flowables) or ("full", flowables).
     blocks = []
     table_no = 0
 
-    def panel(flowables):
-        """Boxed style: a lightly tinted panel within the column."""
-        t = Table([[fl] for fl in flowables], colWidths=[COLUMN_WIDTH])
+    def panel(flowables, full=False):
+        """Boxed style: tinted panel. full=True spans the text measure."""
+        width = TEXT_WIDTH if full else COLUMN_WIDTH
+        t = Table([[fl] for fl in flowables], colWidths=[width])
         t.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(PANEL)),
             ("LINEABOVE", (0, 0), (-1, 0), 0.8, colors.HexColor(ACCENT)),
@@ -331,33 +590,56 @@ def _render(article_path, out_path, doi_override=None, page_count=None):
         ]))
         return t
 
-    for field in fields:
-        key, label, shape = field["key"], field["label"], field["shape"]
-        style_name = field.get("style") or ("table" if shape == "table" else "plain")
+    def emit_leaf(field_def, value, name=None):
+        """Render one leaf field; appends to blocks."""
+        nonlocal table_no
+        if not isinstance(field_def, dict):
+            return
+        shape = field_def.get("shape") or "text"
+        style_name = field_def.get("style") or ("table" if shape == "table" else "plain")
+        label = field_def.get("label")  # may be None: section questions use content as heading
+        optional = field_def.get("optional")
+
         if style_name == "badge":
-            continue  # shown as the kicker above the title
-        value = article.get(key)
-        if value is None or value == "" or value == []:
-            if not field.get("optional"):
-                blocks.append(("col", [Paragraph(f"[Missing required field: {escape(label)}]", st["error"])]))
-            continue
-        heading = Paragraph(escape(label).upper(), st["head"])
+            return  # already used as kicker
+
+        empty = value is None or value == "" or value == []
+        if empty:
+            if not optional and label:
+                blocks.append(("col", [Paragraph(
+                    f"[Missing required field: {escape(label)}]", st["error"])]))
+            return
+
+        heading = Paragraph(escape(label).upper(), st["head"]) if label else None
         text_style = st["opinion"] if style_name == "opinion" else st["text"]
 
+        # ---- table (structured rows or dynamic wrapper) ----
         if shape == "table":
-            ok = isinstance(value, list) and all(isinstance(r, dict) for r in value)
-            if not ok:
-                blocks.append(("col", [heading, Paragraph(
-                    f"[cannot display &quot;{escape(label)}&quot;: content does not match "
-                    f"the expected table shape]", st["error"])]))
-                continue
+            # Wrapper form: {label, columns, rows}
+            if isinstance(value, dict) and "columns" in value and "rows" in value:
+                cols = value.get("columns") or []
+                rows = value.get("rows") or []
+                tlabel = value.get("label") or label or "Table"
+            elif isinstance(value, list) and all(isinstance(r, dict) for r in value):
+                cols = field_def.get("columns") or []
+                if cols == "dynamic" or not cols:
+                    cols = list(value[0].keys()) if value else []
+                rows = value
+                tlabel = label or "Table"
+            else:
+                blocks.append(("col", [
+                    heading if heading else Spacer(1, 0),
+                    Paragraph(
+                        f"[cannot display &quot;{escape(str(label or name))}&quot;: "
+                        f"content does not match the expected table shape]", st["error"])
+                ]))
+                return
             table_no += 1
-            cols = field.get("columns", [])
-            data = [[Paragraph(escape(c.replace("_", " ")).upper(), st["cellhead"]) for c in cols]] + [
-                [Paragraph(escape(str(r.get(c, ""))), st["cell"]) for c in cols] for r in value]
+            data = [[Paragraph(escape(str(c).replace("_", " ")).upper(), st["cellhead"]) for c in cols]]
+            data += [[Paragraph(escape(str(r.get(c, ""))), st["cell"]) for c in cols] for r in rows]
             t = Table(data, repeatRows=1, hAlign="LEFT",
-                      colWidths=compute_col_widths(cols, value, font=f["body"], size=8.3))
-            t.setStyle(TableStyle([  # booktabs: rules above, below the header, and at the end
+                      colWidths=compute_col_widths(cols, rows, font=f["body"], size=8.3))
+            t.setStyle(TableStyle([
                 ("LINEABOVE", (0, 0), (-1, 0), 1.0, colors.HexColor(RULE_STRONG)),
                 ("LINEBELOW", (0, 0), (-1, 0), 0.5, colors.HexColor(RULE_STRONG)),
                 ("LINEBELOW", (0, 1), (-1, -2), 0.3, colors.HexColor(RULE)),
@@ -367,46 +649,162 @@ def _render(article_path, out_path, doi_override=None, page_count=None):
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ]))
             blocks.append(("full", [
-                Paragraph(f"TABLE {table_no}.&nbsp; {escape(label).upper()}", st["caption"]),
+                Paragraph(f"TABLE {table_no}.&nbsp; {escape(str(tlabel)).upper()}", st["caption"]),
                 t, Spacer(1, 8)]))
-            continue
+            return
 
-        body = []
-        if shape == "text":
-            body = [Paragraph(escape(str(value)), text_style)]
-        elif shape == "list" and isinstance(value, list):
+        # ---- list of tables (dynamic) ----
+        if shape == "list" and isinstance(field_def.get("item"), dict) and field_def["item"].get("shape") == "table":
+            if not isinstance(value, list):
+                return
+            for twrap in value:
+                emit_leaf(field_def["item"], twrap, name=name)
+            return
+
+        # ---- list (bullets / numbered) ----
+        if shape == "list" and isinstance(value, list):
+            body = []
             numbered = style_name == "numbered"
             for n, item in enumerate(value, 1):
-                body.append(Paragraph(escape(str(item)), st["ref"] if numbered else st["bullet"],
-                                      bulletText=f"{n}." if numbered else "\u2022"))
-        elif shape in ("boolean", "date"):
-            # short values run in after their label on one line:
-            # "CONFLICTS OF INTEREST DECLARED  No"
+                body.append(Paragraph(
+                    _inline_md(str(item)),
+                    st["ref"] if numbered else st["bullet"],
+                    bulletText=f"{n}." if numbered else "\u2022"))
+            if style_name == "boxed" and heading:
+                blocks.append(("col", [heading, panel(body)]))
+            elif heading:
+                blocks.append(("col", [heading] + body))
+            else:
+                blocks.append(("col", body))
+            return
+
+        # ---- boolean / date (run-in) ----
+        if shape in ("boolean", "date"):
+            import datetime as _dt
             if shape == "boolean":
                 txt = "Yes" if value else "No"
             else:
-                txt = value.strftime("%-d %B %Y") if isinstance(value, (_dt.date, _dt.datetime)) else str(value)
+                txt = (value.strftime("%-d %B %Y")
+                       if isinstance(value, (_dt.date, _dt.datetime)) else str(value))
+            lab = label or _human_label(name or "")
             blocks.append(("col", [Paragraph(
-                f'<font name="{f["sans_bold"]}" size="7.8">{escape(label).upper()}</font>'
+                f'<font name="{f["sans_bold"]}" size="7.8">{escape(lab).upper()}</font>'
                 f"&nbsp;&nbsp; {escape(txt)}", st["runin"])]))
-            continue
-        else:
-            body = [Paragraph(f"[unrecognised shape: {escape(shape)}]", st["error"])]
+            return
 
-        if style_name == "boxed":
-            blocks.append(("col", [heading, panel(body)]))
-        else:
-            blocks.append(("col", [heading] + body))
+        # ---- section heading (value IS the heading) ----
+        if style_name == "section" and shape == "text":
+            blocks.append(("full", [Spacer(1, 6), Paragraph(_inline_md(str(value)), st["section"]), Spacer(1, 2)]))
+            return
 
-    story = list(front) + [NextPageTemplate("later")]
+        # ---- text (with Markdown) ----
+        if shape == "text":
+            pieces = md_to_flowables(
+                value, text_style,
+                cell_style=st["cell"], cellhead_style=st["cellhead"],
+                caption_style=st["caption"],
+                table_font=f["body"], table_size=8.3,
+                subhead_style=st.get("subhead"),
+            )
+            pieces = _promote_pre_table_cols(pieces)
+            if not pieces:
+                return
+
+            # Boxed fields: label + body as full-width panel so two-column
+            # balancing cannot interleave them with neighbouring sections.
+            if style_name == "boxed":
+                col_bits = []
+                for kind, fl in pieces:
+                    if kind == "col":
+                        col_bits.append(fl)
+                    else:
+                        # flush any pending body into a full-width boxed panel
+                        if col_bits:
+                            body = ([heading] if heading else []) + [panel(col_bits, full=True)]
+                            blocks.append(("full", body + [Spacer(1, 4)]))
+                            heading = None
+                            col_bits = []
+                        # full pieces (subheads, tables) stay full-width, no extra TABLE N.
+                        # (subheading above the table is the caption)
+                        if not isinstance(fl, Spacer):
+                            blocks.append(("full", [fl]))
+                        else:
+                            blocks.append(("full", [fl]))
+                if col_bits or heading:
+                    body = ([heading] if heading else []) + ([panel(col_bits, full=True)] if col_bits else [])
+                    blocks.append(("full", body + [Spacer(1, 4)]))
+                return
+
+            # Plain / opinion text: column body; full-width for subheads + tables
+            if heading:
+                blocks.append(("full", [heading, Spacer(1, 2)]))
+            for kind, fl in pieces:
+                if kind == "col":
+                    blocks.append(("col", [fl]))
+                else:
+                    # Do not inject "TABLE N." — markdown **subheadings** already
+                    # name the table; a bare number looks orphaned under a heading.
+                    blocks.append(("full", [fl]))
+            return
+
+        blocks.append(("col", [Paragraph(
+            f"[unrecognised shape: {escape(str(shape))}]", st["error"])]))
+
+    def emit_block(block_def, value, name=None):
+        """Dispatch one structure entry (leaf, repeat, or block)."""
+        if not isinstance(block_def, dict):
+            return
+        shape = block_def.get("shape")
+        if shape == "repeat":
+            if not isinstance(value, list):
+                return
+            order = _block_order(block_def, "item_order", "item")
+            item_defs = block_def.get("item") or {}
+            for item in value:
+                if not isinstance(item, dict):
+                    continue
+                for sub_name in order:
+                    sub_def = item_defs.get(sub_name) or {}
+                    emit_leaf(sub_def, item.get(sub_name), name=sub_name)
+                # thin rule between sections
+                blocks.append(("col", [Spacer(1, 4),
+                                       HRFlowable(width="100%", thickness=0.4,
+                                                  color=RULE, spaceBefore=2, spaceAfter=4)]))
+        elif shape == "block":
+            if not isinstance(value, dict):
+                return
+            order = _block_order(block_def, "field_order", "fields")
+            field_defs = block_def.get("fields") or {}
+            for sub_name in order:
+                sub_def = field_defs.get(sub_name) or {}
+                emit_leaf(sub_def, value.get(sub_name), name=sub_name)
+        else:
+            emit_leaf(block_def, value, name=name)
+
+    structure = schema.get("structure") or []
+    block_defs = schema.get("blocks") or {}
+    # Backward compatibility: old flat `fields:` list schemas
+    if not structure and schema.get("fields"):
+        for field in schema["fields"]:
+            if field.get("visibility") == "editor":
+                continue
+            emit_leaf(field, article.get(field.get("key")), name=field.get("key"))
+    else:
+        for bname in structure:
+            emit_block(block_defs.get(bname) or {}, article.get(bname), name=bname)
+
+        story = list(front) + [NextPageTemplate("later")]
     run = []
 
     def flush():
-        if run:
-            story.append(BalancedColumns(list(run), nCols=2, innerPadding=COLUMN_GAP,
-                                         leftPadding=0, rightPadding=0, topPadding=0,
-                                         bottomPadding=0, spaceAfter=4))
-            run.clear()
+        if not run:
+            return
+        # Always two-column for body text. Short intros above tables are
+        # already promoted to full-width in _promote_pre_table_cols.
+        story.append(BalancedColumns(list(run), nCols=2, innerPadding=COLUMN_GAP,
+                                     leftPadding=0, rightPadding=0, topPadding=0,
+                                     bottomPadding=0, spaceAfter=4))
+        run.clear()
 
     for kind, fl in blocks:
         if kind == "col":

@@ -83,7 +83,7 @@ MARKDOWN_EXTS = {".md", ".markdown", ".mkdown", ".mkdn", ".mkd"}
 LEAF_SHAPES = {"text", "list", "table", "boolean", "date"}
 COMPOSITE_SHAPES = {"repeat", "block"}
 VALID_SHAPES = LEAF_SHAPES | COMPOSITE_SHAPES
-VALID_STYLES = {"plain", "boxed", "opinion", "badge", "table", "numbered"}
+VALID_STYLES = {"plain", "boxed", "opinion", "badge", "table", "numbered", "section"}
 
 
 # ---------------------------------------------------------------------------

@@ -1,8 +1,8 @@
 # Schema content locks — see scripts/validate_schema.py
 # Do not hand-edit hashes unless restoring a known-good state.
 schema-educational-review:
-  content_hash: e7eddbe378a913ca6486f2403729f5095e19ca148c26a3a525401c4b7ff254fc
-  locked_at: '2026-09-30T10:06:43Z'
+  content_hash: 8d403eeaebb4d08ea3e4cd995be84b7ca4f09dc0d1bf917511d869f7f3cab012
+  locked_at: '2026-09-30T11:08:08Z'
   locked_by:
   - ihd.md
   - renal.md

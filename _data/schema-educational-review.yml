@@ -2,54 +2,101 @@ version: 1
 article_type: educational_review
 
 structure:
+  - article_type
   - question
   - background
   - sections
+  - take_home_messages
   - bottom_line
+  - references
+  - conflicts_declared
+  - last_reviewed
+  - editorial_note
 
 blocks:
 
+  article_type:
+    shape: text
+    style: badge
+    label: "Article type"
+    optional: true
+
   question:
-    label: "Question"
     shape: text
     style: boxed
+    label: "Core Question"
 
   background:
-    label: "Background"
     shape: text
+    label: "Background"
 
   sections:
-    label: "Sections"
     shape: repeat
     item_order:
+      - heading
       - question
-      - text
+      - content
       - tables
       - bottom_line
     item:
+      heading:
+        shape: text
+        style: section
+        # value IS the subheading (h2); not a question
       question:
-        label: "Question"
         shape: text
         style: boxed
+        label: "Question"
         optional: true
-      text:
-        label: "Text"
+        max_chars: 250
+      content:
         shape: text
+        optional: true
       tables:
-        label: "Tables"
         shape: list
         optional: true
         item:
           shape: table
           columns: dynamic
       bottom_line:
-        label: "Bottom line"
         shape: text
         style: boxed
+        label: "Bottom line"
+        optional: true
         max_chars: 300
 
+  take_home_messages:
+    shape: list
+    style: numbered
+    label: "Take-Home Messages"
+    optional: true
+
   bottom_line:
-    label: "Bottom line"
     shape: text
     style: boxed
+    label: "Summary / Bottom Line"
     teaser: true
+    max_chars: 300
+
+  references:
+    shape: list
+    style: numbered
+    label: "References"
+    optional: true
+
+  conflicts_declared:
+    shape: boolean
+    label: "Conflicts of interest declared"
+    optional: true
+
+  last_reviewed:
+    shape: date
+    label: "Evidence reviewed on"
+    optional: true
+
+  editorial_note:
+    shape: text
+    style: opinion
+    label: "Editorial note"
+    optional: true
+    visibility: editor
