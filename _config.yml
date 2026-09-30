@@ -2,19 +2,27 @@
 # Your publication. Edit these values; every page reads them from here.
 # ---------------------------------------------------------------------------
 title: Practical Pathology in Focus
-tagline: A single-author microjournal
+tagline: Practical articles and educational reviews for everyday diagnostic pathology
 description: >-
-  Short, focused articles on practical questions, each separating the
-  evidence from the author's interpretation and personal view.
+  Focused articles and in-depth educational reviews for practising pathologists
+  and trainees. Each piece separates the published evidence from the author's
+  interpretation and personal view.
 
 # Homepage text (shown under "The premise" and at the foot of the homepage)
-premise_lead: "One question per article."
+premise_lead: "Diagnostic experience, grounded in evidence."
 premise_text: >-
-  Each article asks one practical question, names the sources behind the
-  answer, and keeps the evidence, the recommendation, and the author's own
-  view clearly apart.
+  Written by Ewe Seng Ch'ng, MD, MPath, FIAC, FAMM, a consultant anatomical pathologist with more
+  than fifteen years in diagnostic practice, biomarker validation, and
+  ISO 15189 laboratory leadership. Short articles address single practical
+  questions; educational reviews examine topics in depth. Each piece
+  identifies its sources and distinguishes the published evidence, the
+  resulting recommendation, and the author's own interpretation.
 publication_note: >-
-  A single-author, non-peer-reviewed publication.
+  Content is not subject to formal peer review. It represents a critical
+  synthesis of the published literature informed by the author's diagnostic
+  practice, and should be applied in conjunction with current professional
+  guidelines and individual clinical judgement. Views expressed are the
+  author's own and do not necessarily reflect those of his institution.
 
 # Web address. For https://USERNAME.github.io/REPOSITORY/ the build sets the
 # sub-path automatically; only change url to your own GitHub address.
