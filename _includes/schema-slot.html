@@ -9,7 +9,7 @@
 <div class="schema-slot">
   {%- for block_name in schema.structure -%}
     {%- assign block_def = schema.blocks[block_name] -%}
-    {%- assign value = article[block_name] -%}
-    {% include schema-block.html block=block_def name=block_name value=value %}
+    {%- assign block_value = article[block_name] -%}
+    {% include schema-block.html b=block_def n=block_name v=block_value %}
   {%- endfor -%}
 </div>
