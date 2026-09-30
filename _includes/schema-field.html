@@ -1,72 +1,34 @@
 {%- comment -%}
-  Renders ONE schema field, generically, based only on its declared shape.
-  Knows shapes and styles; knows nothing about any particular block name.
+  Renders one block according to its declared shape.
+    shape: repeat  -> iterate the value as a list of objects, rendering
+                      each sub-field through schema-field.html
+    shape: block   -> render each named sub-field once through schema-field.html
+    otherwise      -> leaf field; hand to schema-field.html
 {%- endcomment -%}
-{%- assign field = include.field -%}
-{%- assign value = include.value -%}
+{%- assign b = include.block -%}
+{%- assign name = include.name -%}
+{%- assign val = include.value -%}
 
-{%- if value == nil or value == "" -%}
-  {%- unless field.optional -%}
-    <div class="field-missing">Missing required field: {{ field.label }}</div>
-  {%- endunless -%}
+{%- if b.shape == "repeat" -%}
+  {%- for item in val -%}
+    <section class="schema-section">
+      {%- for sub_name in b.item_order -%}
+        {%- assign sub_def = b.item[sub_name] -%}
+        {%- assign sub_value = item[sub_name] -%}
+        {% include schema-field.html f=sub_def v=sub_value %}
+      {%- endfor -%}
+    </section>
+  {%- endfor -%}
+
+{%- elsif b.shape == "block" -%}
+  <section class="schema-block schema-block-{{ name }}">
+    {%- for sub_name in b.field_order -%}
+      {%- assign sub_def = b.fields[sub_name] -%}
+      {%- assign sub_value = val[sub_name] -%}
+      {% include schema-field.html f=sub_def v=sub_value %}
+    {%- endfor -%}
+  </section>
 
 {%- else -%}
-  {%- if field.style -%}{%- assign fstyle = field.style -%}
-  {%- elsif field.shape == "table" -%}{%- assign fstyle = "table" -%}
-  {%- else -%}{%- assign fstyle = "plain" -%}{%- endif %}
-
-  <div class="field field-style-{{ fstyle }}" data-key="{{ field.key }}">
-    {%- if field.label %}<h2 class="field-label">{{ field.label }}</h2>{%- endif -%}
-
-    {%- if field.shape == "text" -%}
-      <div class="field-text">{{ value | markdownify }}</div>
-
-    {%- elsif field.shape == "list" and field.item.shape == "table" -%}
-      {%- for t in value -%}
-        <table class="field-table">
-          <thead><tr>{% for c in t.columns %}<th>{{ c | capitalize }}</th>{% endfor %}</tr></thead>
-          <tbody>
-            {%- for row in t.rows -%}
-              <tr>{% for c in t.columns %}<td>{{ row[c] }}</td>{% endfor %}</tr>
-            {%- endfor -%}
-          </tbody>
-        </table>
-      {%- endfor -%}
-
-    {%- elsif field.shape == "list" and fstyle == "numbered" -%}
-      <ol class="field-list field-list-numbered">
-        {%- for item in value %}<li>{{ item }}</li>{% endfor -%}
-      </ol>
-
-    {%- elsif field.shape == "list" -%}
-      <ul class="field-list">
-        {%- for item in value %}<li>{{ item }}</li>{% endfor -%}
-      </ul>
-
-    {%- elsif field.shape == "table" -%}
-      {%- assign table_ok = true -%}
-      {%- unless value.first.first -%}{%- assign table_ok = false -%}{%- endunless -%}
-      {%- if table_ok -%}
-      <table class="field-table">
-        <thead><tr>{% for c in field.columns %}<th>{{ c | capitalize }}</th>{% endfor %}</tr></thead>
-        <tbody>
-          {%- for row in value %}
-          <tr>{% for c in field.columns %}<td>{{ row[c] }}</td>{% endfor %}</tr>
-          {% endfor -%}
-        </tbody>
-      </table>
-      {%- else -%}
-      <p class="field-text field-render-error">[cannot display "{{ field.label }}": its content does not match the expected table shape.]</p>
-      {%- endif -%}
-
-    {%- elsif field.shape == "boolean" -%}
-      <p class="field-text">{% if value %}Yes{% else %}No{% endif %}</p>
-
-    {%- elsif field.shape == "date" -%}
-      <p class="field-text">{{ value | date: "%-d %B %Y" }}</p>
-
-    {%- else -%}
-      <p class="field-text field-unknown-shape">[unrecognised shape: {{ field.shape }}]</p>
-    {%- endif -%}
-  </div>
+  {% include schema-field.html f=b v=val %}
 {%- endif -%}
