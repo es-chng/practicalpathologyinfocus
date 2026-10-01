@@ -76,7 +76,6 @@ blocks:
     shape: text
     style: boxed
     label: "Summary / Bottom Line"
-    teaser: true
     max_chars: 300
 
   references:
