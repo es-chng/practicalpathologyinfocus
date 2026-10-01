@@ -76,7 +76,7 @@ blocks:
     shape: text
     style: boxed
     label: "Summary / Bottom Line"
-    max_chars: 300
+    max_chars: 400
 
   references:
     shape: list
