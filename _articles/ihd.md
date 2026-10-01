@@ -6,19 +6,19 @@ authors:
   family: Ch'ng
   affiliation: Universiti Sains Malaysia, Malaysia
 corresponding_email: chngeweseng@hotmail.com
-volume: 2
+volume: 1
 issue: 1
 order: 1
 pages: 1-12
 published_date: 2026-09-29
 licence: CC BY 4.0
 status: published
-article_type: Pathology framework
+article_type: Educational Review
 schema: schema-educational-review
 question: |-
   How does myocardial ischemia progress from coronary plaque to myocardial infarction and scar, and how do morphologic features guide the dating of infarction, recognition of complications, and clinical management?
 background: |-
-  Ischemic heart disease is an imbalance between myocardial oxygen supply and demand. It is the leading cause of death worldwide, accounting for approximately nine million deaths each year, although age-adjusted mortality in high-income countries has fallen by more than half since the 1960s through prevention, better therapy, and lifestyle change. The principal cause is obstructive atherosclerosis of the epicardial coronary arteries. Stable angina and acute coronary syndromes are not points on a single scale of stenosis severity: they are distinct clinical entities with different plaque biology, presentation, and management. This framework follows the disease from etiology and plaque biology through the ischemic myocardium, the morphologic evolution of infarction, reperfusion in the acute and chronic settings, initial management, complications, and synthesis. It is written for postgraduate pathology review.
+  Ischemic heart disease is an imbalance between myocardial oxygen supply and demand. It is the leading cause of death worldwide, accounting for approximately nine million deaths each year, although age-adjusted mortality in high-income countries has fallen by more than half since the 1960s through prevention, better therapy, and lifestyle change. The principal cause is obstructive atherosclerosis of the epicardial coronary arteries. Stable angina and acute coronary syndromes are not points on a single scale of stenosis severity: they are distinct clinical entities with different plaque biology, presentation, and management. This educational review follows the disease from etiology and plaque biology through the ischemic myocardium, the morphologic evolution of infarction, reperfusion in the acute and chronic settings, initial management, complications, and synthesis.
 sections:
 - heading: Foundations
   question: What is myocardial ischemia, and what is the spectrum of clinical syndromes it
@@ -32,6 +32,20 @@ sections:
     often used synonymously with coronary artery disease. Lesions favour the
     proximal segments and branch points of the left anterior descending (LAD),
     left circumflex (LCX), and right coronary (RCA) arteries.
+
+    **Mechanisms of Diminished Coronary Supply**
+    + Vascular Blockages: Driven primarily by atherosclerosis (accounting for >90% of instances) via chronic stenosis or acute thrombotic events.
+    + Arterial Spasms: Temporary vessel constriction caused by conditions like Prinzmetal angina or illicit stimulants.
+    + Embolic Obstructions: Clots migrating from atrial fibrillation, ventricular thrombi, or infected heart valves.
+    + Inflammation & Structural Tears: Conditions impacting the vessel wall, such as vasculitis or spontaneous arterial dissections.
+    + Small Vessel Damage: Microvascular dysfunction typically stemming from long-term diabetes or hypertension.
+    + Systemic Delivery Failures: Reduced systemic perfusion or low blood oxygen levels caused by shock and anemia.
+
+   **Acute Triggers Affecting the Supply-Demand Equilibrium**
+   + Rapid Heart Rate (Tachycardia): Increases oxygen requirements while simultaneously restricting supply by shortening diastolic filling time.
+   + Enlarged Heart Muscle (Hypertrophy): Amplifies oxygen demand due to larger tissue mass, while relative capillary distribution drops.
+   + Low Oxygen Delivery (Anemia/Hypoxemia): Leaves cardiac demand unchanged but severely reduces the oxygen concentration in the blood.
+   + Low Blood Pressure (Hypotension): Drops the physical pressure needed to force blood through the coronary arteries.
 
     **Causes of reduced supply**
 
