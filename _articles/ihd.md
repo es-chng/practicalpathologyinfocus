@@ -12,7 +12,7 @@ order: 1
 pages: 1-12
 published_date: '2026-09-29'
 licence: CC BY 4.0
-status: draft
+status: published
 article_type: Educational Review
 schema: schema-educational-review
 question: |-
