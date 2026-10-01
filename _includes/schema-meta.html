@@ -1,37 +1,56 @@
 {%- comment -%}
-  Discovers teaser and badge keys from an article schema.
+  Discover teaser + badge keys from a schema (structure/blocks or legacy fields).
 
-  Supports:
-    - current structure/blocks format (block name = article key)
-    - legacy fields[] format (f.key)
-
-  Sets in the caller scope:
+  Outputs (assigned in this include — Jekyll shares them with the caller):
     schema_teaser_key
     schema_badge_key
+
+  Also sets convenience values when an article is passed:
+    include.article → schema_teaser_value, schema_badge_value
 {%- endcomment -%}
 {%- assign schema_teaser_key = nil -%}
 {%- assign schema_badge_key = nil -%}
+{%- assign schema_teaser_value = nil -%}
+{%- assign schema_badge_value = nil -%}
 {%- assign _schema = include.schema -%}
-{%- if _schema -%}
-  {%- if _schema.blocks -%}
-    {%- if _schema.structure -%}
-      {%- for _bname in _schema.structure -%}
-        {%- assign _bdef = _schema.blocks[_bname] -%}
-        {%- if _bdef.teaser -%}{%- assign schema_teaser_key = _bname -%}{%- endif -%}
-        {%- if _bdef.style == "badge" -%}{%- assign schema_badge_key = _bname -%}{%- endif -%}
-      {%- endfor -%}
-    {%- else -%}
-      {%- comment -%} fallback: iterate block map values with name from structure only {%- endcomment -%}
-      {%- for _bname in _schema.blocks -%}
-        {%- assign _bdef = _schema.blocks[_bname] -%}
-        {%- if _bdef.teaser -%}{%- assign schema_teaser_key = _bname -%}{%- endif -%}
-        {%- if _bdef.style == "badge" -%}{%- assign schema_badge_key = _bname -%}{%- endif -%}
-      {%- endfor -%}
+{%- assign _article = include.article -%}
+
+{%- if _schema.blocks -%}
+  {%- for _bname in _schema.structure -%}
+    {%- assign _bdef = _schema.blocks[_bname] -%}
+    {%- if _bdef.teaser == true -%}
+      {%- assign schema_teaser_key = _bname -%}
     {%- endif -%}
-  {%- elsif _schema.fields -%}
-    {%- for f in _schema.fields -%}
-      {%- if f.teaser -%}{%- assign schema_teaser_key = f.key -%}{%- endif -%}
-      {%- if f.style == "badge" -%}{%- assign schema_badge_key = f.key -%}{%- endif -%}
-    {%- endfor -%}
+    {%- if _bdef.style == "badge" -%}
+      {%- assign schema_badge_key = _bname -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- elsif _schema.fields -%}
+  {%- for f in _schema.fields -%}
+    {%- if f.teaser -%}{%- assign schema_teaser_key = f.key -%}{%- endif -%}
+    {%- if f.style == "badge" -%}{%- assign schema_badge_key = f.key -%}{%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- comment -%}
+  Resolve values without article[dynamic_key] (unreliable on collection docs).
+  Known teaser/badge keys used by the educational-review schema are checked
+  explicitly; any other key falls back to bracket access.
+{%- endcomment -%}
+{%- if _article -%}
+  {%- if schema_teaser_key == "bottom_line" -%}
+    {%- assign schema_teaser_value = _article.bottom_line -%}
+  {%- elsif schema_teaser_key == "teaser" -%}
+    {%- assign schema_teaser_value = _article.teaser -%}
+  {%- elsif schema_teaser_key -%}
+    {%- assign schema_teaser_value = _article[schema_teaser_key] -%}
+  {%- endif -%}
+
+  {%- if schema_badge_key == "article_type" -%}
+    {%- assign schema_badge_value = _article.article_type -%}
+  {%- elsif schema_badge_key == "badge" -%}
+    {%- assign schema_badge_value = _article.badge -%}
+  {%- elsif schema_badge_key -%}
+    {%- assign schema_badge_value = _article[schema_badge_key] -%}
   {%- endif -%}
 {%- endif -%}
