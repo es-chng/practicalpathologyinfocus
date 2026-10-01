@@ -10,7 +10,7 @@ volume: 1
 issue: 1
 order: 1
 pages: 1-12
-published_date: 2026-09-29
+published_date: '2026-09-29'
 licence: CC BY 4.0
 status: published
 article_type: Educational Review
@@ -24,64 +24,34 @@ sections:
   question: What is myocardial ischemia, and what is the spectrum of clinical syndromes it
     produces?
   content: |-
-    Myocardial ischemia is inadequate perfusion relative to metabolic demand. It
-    differs from pure hypoxemia because substrate delivery and removal of
-    metabolites are also impaired, so ischemic injury evolves faster than
-    hypoxic injury alone. The principal cause is obstructive atherosclerosis of
-    the epicardial coronary arteries, which is why ischemic heart disease is
-    often used synonymously with coronary artery disease. Lesions favour the
-    proximal segments and branch points of the left anterior descending (LAD),
-    left circumflex (LCX), and right coronary (RCA) arteries.
+    Myocardial ischemia is inadequate perfusion relative to metabolic demand. It differs from pure hypoxemia because substrate delivery and removal of metabolites are also impaired, so ischemic injury evolves faster than hypoxic injury alone. The principal cause is obstructive atherosclerosis of the epicardial coronary arteries, which is why ischemic heart disease is often used synonymously with coronary artery disease. Lesions favour the proximal segments and branch points of the left anterior descending (LAD), left circumflex (LCX), and right coronary (RCA) arteries.
 
     **Mechanisms of Diminished Coronary Supply**
-  
-    - |- Vascular Blockages: Driven primarily by atherosclerosis (accounting for >90% of instances) via chronic stenosis or acute thrombotic events.
-    - |- Arterial Spasms: Temporary vessel constriction caused by conditions like Prinzmetal angina or illicit stimulants.
-    - |- Embolic Obstructions: Clots migrating from atrial fibrillation, ventricular thrombi, or infected heart valves.
-    - |- Inflammation & Structural Tears: Conditions impacting the vessel wall, such as vasculitis or spontaneous arterial dissections.
-    - |- Small Vessel Damage: Microvascular dysfunction typically stemming from long-term diabetes or hypertension.
-    - |- Systemic Delivery Failures: Reduced systemic perfusion or low blood oxygen levels caused by shock and anemia.
 
-   **Acute Triggers Affecting the Supply-Demand Equilibrium**
-    - Rapid Heart Rate (Tachycardia): Increases oxygen requirements while simultaneously restricting supply by shortening diastolic filling time.
-    - Enlarged Heart Muscle (Hypertrophy): Amplifies oxygen demand due to larger tissue mass, while relative capillary distribution drops.
-    - Low Oxygen Delivery (Anemia/Hypoxemia): Leaves cardiac demand unchanged but severely reduces the oxygen concentration in the blood.
-    - Low Blood Pressure (Hypotension): Drops the physical pressure needed to force blood through the coronary arteries.
+    - **Vascular blockages:** Driven primarily by atherosclerosis (accounting for >90% of instances) via chronic stenosis or acute thrombotic events.
+    - **Arterial spasms:** Temporary vessel constriction caused by conditions like Prinzmetal angina or illicit stimulants.
+    - **Embolic obstructions:** Clots migrating from atrial fibrillation, ventricular thrombi, or infected heart valves.
+    - **Inflammation and structural tears:** Conditions impacting the vessel wall, such as vasculitis or spontaneous arterial dissections.
+    - **Small vessel damage:** Microvascular dysfunction typically stemming from long-term diabetes or hypertension.
+    - **Systemic delivery failures:** Reduced systemic perfusion or low blood oxygen levels caused by shock and anemia.
 
-    **Causes of reduced supply**
+    **Acute Triggers Affecting the Supply-Demand Equilibrium**
 
-    | Category | Examples |
-    |---|---|
-    | Atherosclerosis (>90% of cases) | Fixed stenosis; acute plaque change with thrombosis |
-    | Vasospasm | Prinzmetal angina; drug-induced (cocaine, ephedrine) |
-    | Coronary embolism | Atrial fibrillation, left ventricular thrombus, endocarditis, prosthetic valves |
-    | Vasculitis and dissection | Kawasaki disease; spontaneous coronary artery dissection (SCAD) |
-    | Microvascular disease | Diabetes, hypertension |
-    | Low perfusion pressure or O₂ content | Shock, hypotension, hypoxemia, anemia |
+    - **Rapid heart rate (tachycardia):** Increases oxygen requirements while simultaneously restricting supply by shortening diastolic filling time.
+    - **Enlarged heart muscle (hypertrophy):** Amplifies oxygen demand due to larger tissue mass, while relative capillary distribution drops.
+    - **Low oxygen delivery (anemia/hypoxemia):** Leaves cardiac demand unchanged but severely reduces the oxygen concentration in the blood.
+    - **Low blood pressure (hypotension):** Drops the physical pressure needed to force blood through the coronary arteries.
 
-    **Precipitants that tip the balance**
+    **Clinical Spectrum of Ischemic Heart Disease**
 
-    | Precipitant | Effect on demand | Effect on supply |
-    |---|---|---|
-    | Tachycardia | ↑ Heart rate increases O₂ demand | ↓ Shorter diastole reduces left ventricular perfusion time |
-    | Myocardial hypertrophy | ↑ Muscle mass and wall stress | ↓ Capillary density relative to muscle mass |
-    | Anemia, hypoxemia | — | ↓ Arterial O₂ content |
-    | Systemic hypotension | — | ↓ Coronary perfusion pressure |
+    - **Angina pectoris (stable, unstable, Prinzmetal):** Occurs due to temporary ischemia without causing cell death. It presents as reversible chest pain.
+    - **Myocardial infarction (MI):** Results from extended ischemia that leads to permanent heart muscle necrosis. It presents as an acute heart attack that eventually heals via scar tissue formation.
+    - **Chronic ischemic heart disease:** Driven by a gradual loss of heart cells, ongoing scarring, and structural remodeling. It ultimately progresses to ischemic cardiomyopathy and congestive heart failure.
+    - **Sudden cardiac death (SCD):** Triggered by a fatal arrhythmia arising from a sudden lack of blood flow or old scar tissue. It results in death occurring within roughly an hour of symptom onset.
 
-    Tachycardia is doubly harmful because it acts on both sides of the balance.
+    **Acute Coronary Syndromes (ACS)**
 
-    **Clinical spectrum**
-
-    | Syndrome | Pathophysiology | Outcome |
-    |---|---|---|
-    | Angina pectoris (stable, Prinzmetal, unstable) | Transient ischemia without necrosis | Chest pain; reversible |
-    | Myocardial infarction | Prolonged ischemia with irreversible myocyte necrosis | Acute infarct; may heal as scar |
-    | Chronic ischemic heart disease | Progressive myocyte loss, scarring, remodeling | Ischemic cardiomyopathy and heart failure |
-    | Sudden cardiac death | Lethal arrhythmia from acute ischemia or scar | Death within about one hour of symptoms |
-
-    Unstable angina, non-ST-elevation myocardial infarction (NSTEMI), and
-    ST-elevation myocardial infarction (STEMI) together form the acute coronary
-    syndromes (ACS).
+    - A collective clinical classification that encompasses unstable angina, non-ST-elevation myocardial infarction (NSTEMI), and ST-elevation myocardial infarction (STEMI).
   tables: []
   bottom_line: |-
     Ischemic heart disease is a supply-demand imbalance; the principal cause is epicardial coronary atherosclerosis, but precipitants and non-atherosclerotic causes must be considered in every case.
@@ -627,5 +597,5 @@ references:
 - |-
   Heusch G. Myocardial ischaemia-reperfusion injury and cardioprotection in perspective. Nat Rev Cardiol. 2020;17:773-789.
 conflicts_declared: false
-last_reviewed: 2026-09-29
+last_reviewed: '2026-09-29'
 ---
