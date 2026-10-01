@@ -64,7 +64,7 @@ blocks:
         style: boxed
         label: "Bottom line"
         optional: true
-        max_chars: 300
+        max_chars: 400
 
   take_home_messages:
     shape: list
