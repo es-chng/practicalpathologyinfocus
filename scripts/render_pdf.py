@@ -253,6 +253,41 @@ def md_to_flowables(text, para_style, cell_style=None, cellhead_style=None,
             out.append(("full", Spacer(1, 4)))
             continue
 
+        # --- bullet / numbered list ---
+        bullet_m = re.match(r'^(\s*)([-*+]|\d+[.)])\s+(.*)$', line)
+        if bullet_m and not _is_table_row(line):
+            flush_para()
+            items = []
+            while i < len(lines):
+                bm = re.match(r'^(\s*)([-*+]|\d+[.)])\s+(.*)$', lines[i])
+                if not bm:
+                    # continuation line of previous item (indented, non-empty, not a new block)
+                    if items and lines[i].startswith('  ') and lines[i].strip() and not subhead_re.match(lines[i]) and not _is_table_row(lines[i]):
+                        items[-1] = items[-1] + ' ' + lines[i].strip()
+                        i += 1
+                        continue
+                    break
+                marker, body = bm.group(2), bm.group(3)
+                numbered = bool(re.match(r'\d+[.)]', marker))
+                items.append((numbered, body))
+                i += 1
+            for n, (numbered, body) in enumerate(items, 1):
+                bullet = f'{n}.' if numbered else '\u2022'
+                list_style = ParagraphStyle(
+                    'md_bullet',
+                    parent=para_style,
+                    leftIndent=14,
+                    bulletIndent=0,
+                    spaceBefore=1.5,
+                    spaceAfter=2.5,
+                )
+                out.append(("col", Paragraph(
+                    _inline_md(body),
+                    list_style,
+                    bulletText=bullet,
+                )))
+            continue
+
         if _is_table_row(line):
             flush_para()
             tlines = []
@@ -280,8 +315,8 @@ def md_to_flowables(text, para_style, cell_style=None, cellhead_style=None,
             data = [[Paragraph(_inline_md(c), ch) for c in header]]
             data += [[Paragraph(_inline_md(c), cs) for c in r] for r in body_rows]
             col_keys = [f"c{n}" for n in range(ncols)]
-            fake_rows = [{col_keys[j]: body_rows[i][j] for j in range(ncols)}
-                         for i in range(len(body_rows))]
+            fake_rows = [{col_keys[j]: body_rows[ri][j] for j in range(ncols)}
+                         for ri in range(len(body_rows))]
             widths = compute_col_widths(col_keys, fake_rows, font=table_font, size=table_size)
             from reportlab.lib import colors as _colors
             t = Table(data, repeatRows=1, hAlign="LEFT", colWidths=widths)
@@ -304,7 +339,7 @@ def md_to_flowables(text, para_style, cell_style=None, cellhead_style=None,
             continue
         para_buf.append(line)
         i += 1
-    flush_para()
+
     return out
 
 
