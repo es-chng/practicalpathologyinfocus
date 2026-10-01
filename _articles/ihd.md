@@ -25,9 +25,7 @@ sections:
     produces?
   content: |-
     Myocardial ischemia is inadequate perfusion relative to metabolic demand. It differs from pure hypoxemia because substrate delivery and removal of metabolites are also impaired, so ischemic injury evolves faster than hypoxic injury alone. The principal cause is obstructive atherosclerosis of the epicardial coronary arteries, which is why ischemic heart disease is often used synonymously with coronary artery disease. Lesions favour the proximal segments and branch points of the left anterior descending (LAD), left circumflex (LCX), and right coronary (RCA) arteries.
-
     **Mechanisms of Diminished Coronary Supply**
-
     - **Vascular blockages:** Driven primarily by atherosclerosis (accounting for >90% of instances) via chronic stenosis or acute thrombotic events.
     - **Arterial spasms:** Temporary vessel constriction caused by conditions like Prinzmetal angina or illicit stimulants.
     - **Embolic obstructions:** Clots migrating from atrial fibrillation, ventricular thrombi, or infected heart valves.
@@ -36,7 +34,6 @@ sections:
     - **Systemic delivery failures:** Reduced systemic perfusion or low blood oxygen levels caused by shock and anemia.
 
     **Acute Triggers Affecting the Supply-Demand Equilibrium**
-
     - **Rapid heart rate (tachycardia):** Increases oxygen requirements while simultaneously restricting supply by shortening diastolic filling time.
     - **Enlarged heart muscle (hypertrophy):** Amplifies oxygen demand due to larger tissue mass, while relative capillary distribution drops.
     - **Low oxygen delivery (anemia/hypoxemia):** Leaves cardiac demand unchanged but severely reduces the oxygen concentration in the blood.
@@ -50,7 +47,6 @@ sections:
     - **Sudden cardiac death (SCD):** Triggered by a fatal arrhythmia arising from a sudden lack of blood flow or old scar tissue. It results in death occurring within roughly an hour of symptom onset.
 
     **Acute Coronary Syndromes (ACS)**
-
     - A collective clinical classification that encompasses unstable angina, non-ST-elevation myocardial infarction (NSTEMI), and ST-elevation myocardial infarction (STEMI).
   tables: []
   bottom_line: |-
@@ -59,9 +55,7 @@ sections:
   question: |-
     What distinguishes a stable atherosclerotic plaque from a vulnerable plaque, and how does acute plaque change produce an acute coronary syndrome?
   content: |-
-    There are two separate routes to myocardial ischemia, and they should not be
-    conflated.
-
+    There are two separate routes to myocardial ischemia, and they should not be conflated.
     | Feature | Chronic fixed stenosis | Acute plaque change |
     |---|---|---|
     | Plaque | Stable: thick fibrous cap, small lipid core, little inflammation | Vulnerable: thin fibrous cap, large necrotic core, heavy inflammation |
