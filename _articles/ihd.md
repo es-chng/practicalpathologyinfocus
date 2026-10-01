@@ -34,6 +34,7 @@ sections:
     left circumflex (LCX), and right coronary (RCA) arteries.
 
     **Mechanisms of Diminished Coronary Supply**
+  
     - |- Vascular Blockages: Driven primarily by atherosclerosis (accounting for >90% of instances) via chronic stenosis or acute thrombotic events.
     - |- Arterial Spasms: Temporary vessel constriction caused by conditions like Prinzmetal angina or illicit stimulants.
     - |- Embolic Obstructions: Clots migrating from atrial fibrillation, ventricular thrombi, or infected heart valves.
