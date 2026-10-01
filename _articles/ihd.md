@@ -76,10 +76,10 @@ sections:
 
     **Plaque rupture and plaque erosion**
 
-  Coronary thrombosis primarily occurs through two distinct pathological mechanisms: plaque rupture and plaque erosion.
-  Plaque rupture is responsible for the vast majority of coronary events, characteristically presenting in older men with traditional cardiovascular risk factors. Pathologically, it is defined by a broken, critically thin fibrous cap (under 65 µm) that overlies a massive necrotic lipid core heavily infiltrated by macrophages; this exposure triggers a fibrin-dominant "red" clot rich in erythrocytes.
-  In contrast, plaque erosion accounts for roughly one-quarter to one-third of coronary clots and is more frequently seen in younger patients, women, and smokers, often manifesting as non-ST-elevation acute coronary syndromes. Unlike rupture, an eroded plaque features a structurally intact fibrous cap that has simply lost its endothelial lining. Its underlying structure contains little to no lipid core, consisting instead of smooth muscle cells and proteoglycans that provoke a platelet-dense "white" thrombus embedded with neutrophils and neutrophil extracellular traps.
-  At autopsy, cutting the culprit segment at 3 to 5 mm intervals and taking step sections through the base of the thrombus helps separate rupture from erosion.
+    Coronary thrombosis primarily occurs through two distinct pathological mechanisms: plaque rupture and plaque erosion.
+    Plaque rupture is responsible for the vast majority of coronary events, characteristically presenting in older men with traditional cardiovascular risk factors. Pathologically, it is defined by a broken, critically thin fibrous cap (under 65 µm) that overlies a massive necrotic lipid core heavily infiltrated by macrophages; this exposure triggers a fibrin-dominant "red" clot rich in erythrocytes.
+    In contrast, plaque erosion accounts for roughly one-quarter to one-third of coronary clots and is more frequently seen in younger patients, women, and smokers, often manifesting as non-ST-elevation acute coronary syndromes. Unlike rupture, an eroded plaque features a structurally intact fibrous cap that has simply lost its endothelial lining. Its underlying structure contains little to no lipid core, consisting instead of smooth muscle cells and proteoglycans that provoke a platelet-dense "white" thrombus embedded with neutrophils and neutrophil extracellular traps.
+    At autopsy, cutting the culprit segment at 3 to 5 mm intervals and taking step sections through the base of the thrombus helps separate rupture from erosion.
 
     **The vulnerable patient**
 
