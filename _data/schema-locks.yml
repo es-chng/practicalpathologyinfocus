@@ -4,5 +4,6 @@ schema-educational-review:
   content_hash: 3e0e3e8d8e87393bf89e2eb400eb1288b816a792f7a56a8c53ce73d7926741a0
   locked_at: '2026-10-01T10:59:31Z'
   locked_by:
+  - ihd.md
   - renal.md
   version: 1
