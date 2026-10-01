@@ -1,0 +1,37 @@
+{%- comment -%}
+  Renders one block according to its declared shape.
+    shape: repeat  -> iterate the value as a list of objects, rendering
+                      each sub-field through schema-field.html
+    shape: block   -> render each named sub-field once through schema-field.html
+    otherwise      -> leaf field; hand to schema-field.html
+
+  Order of sub-fields comes from item_order / field_order (required for
+  deterministic order across Liquid engines).
+{%- endcomment -%}
+{%- assign block = include.block -%}
+{%- assign name = include.name -%}
+{%- assign value = include.value -%}
+
+{%- if block.shape == "repeat" -%}
+  {%- for item in value -%}
+    <section class="schema-section">
+      {%- for sub_name in block.item_order -%}
+        {%- assign sub_def = block.item[sub_name] -%}
+        {%- assign sub_value = item[sub_name] -%}
+        {% include schema-field.html field=sub_def name=sub_name value=sub_value %}
+      {%- endfor -%}
+    </section>
+  {%- endfor -%}
+
+{%- elsif block.shape == "block" -%}
+  <section class="schema-block schema-block-{{ name }}">
+    {%- for sub_name in block.field_order -%}
+      {%- assign sub_def = block.fields[sub_name] -%}
+      {%- assign sub_value = value[sub_name] -%}
+      {% include schema-field.html field=sub_def name=sub_name value=sub_value %}
+    {%- endfor -%}
+  </section>
+
+{%- else -%}
+  {% include schema-field.html field=block name=name value=value %}
+{%- endif -%}

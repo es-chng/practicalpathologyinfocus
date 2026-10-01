@@ -1,0 +1,98 @@
+---
+layout: null
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ site.title }}</title>
+  <meta name="description" content="{{ site.description | strip }}">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+</head>
+<body>
+{% include site-header.html %}
+
+{%- assign published = site.articles | where: "status", "published" | sort: "published_date" | reverse -%}
+
+<main class="home">
+  <header class="home-masthead">
+    <p class="home-kicker">{{ site.tagline }}</p>
+    <h1>{{ site.title }}</h1>
+    <p class="home-dek">{{ site.description }}</p>
+  </header>
+
+  <section class="home-principle" aria-labelledby="principle-heading">
+    <p class="section-label" id="principle-heading">The premise</p>
+    <p class="principle-lead">{{ site.premise_lead }}</p>
+    <p>{{ site.premise_text }}</p>
+  </section>
+
+  {%- if published.size > 0 -%}
+    {%- assign featured = published[0] -%}
+    {%- assign featured_schema = site.data[featured.schema] -%}
+    {% include schema-meta.html schema=featured_schema article=featured %}
+
+    <section class="home-feature" aria-labelledby="latest-heading">
+      <div class="section-heading">
+        <p class="section-label" id="latest-heading">Latest</p>
+        <span>{{ featured.published_date | date: "%-d %B %Y" }}</span>
+      </div>
+      <article class="feature-card">
+        {%- if schema_badge_value and schema_badge_value != "" -%}
+          <p class="article-badge">{{ schema_badge_value }}</p>
+        {%- endif -%}
+        <h2><a href="{{ featured.url | relative_url }}">{{ featured.title }}</a></h2>
+        {%- if schema_teaser_value and schema_teaser_value != "" -%}
+          <p class="feature-teaser">{{ schema_teaser_value }}</p>
+        {%- endif -%}
+        <p class="feature-meta">
+          {%- for a in featured.authors -%}
+            {{ a.given }} {{ a.family }}{% unless forloop.last %}, {% endunless %}
+          {%- endfor -%}
+        </p>
+      </article>
+    </section>
+
+    {%- assign recent = published | slice: 1, 4 -%}
+    {%- if recent.size > 0 -%}
+      <section class="home-recent" aria-labelledby="recent-heading">
+        <div class="section-heading">
+          <p class="section-label" id="recent-heading">Recent articles</p>
+          <a href="{{ '/issues/' | relative_url }}">Browse all issues</a>
+        </div>
+        <div class="article-list">
+          {%- for article in recent -%}
+            {%- assign schema = site.data[article.schema] -%}
+            {% include schema-meta.html schema=schema article=article %}
+            <article class="article-row">
+              <div class="article-row-main">
+                {%- if schema_badge_value and schema_badge_value != "" -%}
+                  <p class="article-badge">{{ schema_badge_value }}</p>
+                {%- endif -%}
+                <h2><a href="{{ article.url | relative_url }}">{{ article.title }}</a></h2>
+                {%- if schema_teaser_value and schema_teaser_value != "" -%}
+                  <p>{{ schema_teaser_value }}</p>
+                {%- endif -%}
+              </div>
+              <time datetime="{{ article.published_date | date: '%Y-%m-%d' }}">
+                {{ article.published_date | date: "%b %Y" }}
+              </time>
+            </article>
+          {%- endfor -%}
+        </div>
+      </section>
+    {%- endif -%}
+  {%- else -%}
+    <section class="home-empty">
+      <p>No published articles yet.</p>
+    </section>
+  {%- endif -%}
+
+  <footer class="home-footer-note">
+    <p>{{ site.publication_note }}</p>
+    <p><a href="{{ '/about/' | relative_url }}">Read about the publication →</a></p>
+  </footer>
+</main>
+</body>
+</html>

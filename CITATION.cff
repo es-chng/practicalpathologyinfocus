@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this package, please cite it as below."
+title: "Scholar Schema: a structured academic publishing system"
+version: "1.0.0"
+date-released: "2026-09-23"
+type: software
+authors:
+  - family-names: "Ch'ng"
+    given-names: "Ewe Seng"
+    affiliation: "Universiti Sains Malaysia"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+abstract: >-
+  A structured academic publishing system for microjournals, journal club
+  records and other structured academic writing. A base schema holds the
+  fields every article shares; each article schema builds on it and adds
+  type-specific fields. Articles are built into web pages, PDFs and issues.
+  Designed and specified by the author; implemented with AI-assisted
+  programming under the author's direction.
+keywords:
+  - microjournal
+  - journal club
+  - structured academic writing
+  - schema-driven publishing
+  - Jekyll
+  - GitHub Pages
+  - Zenodo
+license: MIT
+repository-code: "https://github.com/es-chng/scholar-schema"
+url: "https://es-chng.github.io/scholar-schema/"
+# doi: "10.5281/zenodo.XXXXXXX"   # add after the first Zenodo release

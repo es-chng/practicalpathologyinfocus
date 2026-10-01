@@ -1,0 +1,15 @@
+{%- comment -%}
+  Walks schema.structure in order. For each block name, looks up the block
+  definition in schema.blocks and passes it, plus the article's value for
+  that key, to schema-block.html. Schema-blind: never references a block
+  by name.
+{%- endcomment -%}
+{%- assign schema = include.schema -%}
+{%- assign article = include.article -%}
+<div class="schema-slot">
+  {%- for block_name in schema.structure -%}
+    {%- assign block_def = schema.blocks[block_name] -%}
+    {%- assign value = article[block_name] -%}
+    {% include schema-block.html block=block_def name=block_name value=value %}
+  {%- endfor -%}
+</div>

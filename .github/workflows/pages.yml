@@ -1,0 +1,88 @@
+name: Validate, build and publish
+
+# PDFs are incremental only. Zenodo deposit is in zenodo-articles.yml.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # to commit new schema locks back to the repository
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-toolchain
+
+      - name: Validate every article against its schema (locks new schemas automatically)
+        run: python scripts/validate_schema.py
+
+      - name: Commit schema locks if the validator created or updated any
+        run: |
+          if git diff --quiet -- _data/schema-locks.yml; then
+            echo "Schema locks unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add _data/schema-locks.yml
+          git commit -m "chore: lock schema used by newly published article [skip ci]"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Install Jekyll
+        run: bundle install
+
+      - name: Set up Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Restore the PDF cache from the previous run
+        uses: actions/cache@v4
+        with:
+          path: .pdf-cache
+          # v2: a fresh cache. Older caches could contain PDFs made by the Zenodo
+          # job (including sandbox test DOIs) and must never be reused.
+          key: site-pdf-cache-v2-${{ github.run_id }}
+          restore-keys: |
+            site-pdf-cache-v2-
+
+      - name: Build a PDF for every new or changed article (and count its pages)
+        run: python scripts/render_changed_pdfs.py .pdf-cache .pdf-out
+
+      - name: Build the site (reads the page counts written above)
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        env:
+          JEKYLL_ENV: production
+
+      - name: Add the PDFs to the site
+        run: |
+          mkdir -p _site/files
+          cp .pdf-out/*.pdf _site/files/
+
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
