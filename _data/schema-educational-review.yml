@@ -25,6 +25,7 @@ blocks:
     shape: text
     style: boxed
     label: "Core Question"
+    teaser: true
 
   background:
     shape: text
