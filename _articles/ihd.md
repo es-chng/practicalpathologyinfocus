@@ -34,12 +34,12 @@ sections:
     left circumflex (LCX), and right coronary (RCA) arteries.
 
     **Mechanisms of Diminished Coronary Supply**
-    - Vascular Blockages: Driven primarily by atherosclerosis (accounting for >90% of instances) via chronic stenosis or acute thrombotic events.
-    - Arterial Spasms: Temporary vessel constriction caused by conditions like Prinzmetal angina or illicit stimulants.
-    - Embolic Obstructions: Clots migrating from atrial fibrillation, ventricular thrombi, or infected heart valves.
-    - Inflammation & Structural Tears: Conditions impacting the vessel wall, such as vasculitis or spontaneous arterial dissections.
-    - Small Vessel Damage: Microvascular dysfunction typically stemming from long-term diabetes or hypertension.
-    - Systemic Delivery Failures: Reduced systemic perfusion or low blood oxygen levels caused by shock and anemia.
+    - |- Vascular Blockages: Driven primarily by atherosclerosis (accounting for >90% of instances) via chronic stenosis or acute thrombotic events.
+    - |- Arterial Spasms: Temporary vessel constriction caused by conditions like Prinzmetal angina or illicit stimulants.
+    - |- Embolic Obstructions: Clots migrating from atrial fibrillation, ventricular thrombi, or infected heart valves.
+    - |- Inflammation & Structural Tears: Conditions impacting the vessel wall, such as vasculitis or spontaneous arterial dissections.
+    - |- Small Vessel Damage: Microvascular dysfunction typically stemming from long-term diabetes or hypertension.
+    - |- Systemic Delivery Failures: Reduced systemic perfusion or low blood oxygen levels caused by shock and anemia.
 
    **Acute Triggers Affecting the Supply-Demand Equilibrium**
     - Rapid Heart Rate (Tachycardia): Increases oxygen requirements while simultaneously restricting supply by shortening diastolic filling time.
