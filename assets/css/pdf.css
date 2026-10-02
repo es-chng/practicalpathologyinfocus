@@ -229,6 +229,6 @@
   .field-list { margin: 2pt 0; padding-left: 13pt; }
   .field-list li { margin: 1pt 0; padding-left: 1pt; }
   .schema-slot > .field-style-numbered .field-list { column-count: 2; column-gap: 7mm; }
-  .base-footer { display: none; }
+  .base-footer, .pdf-download { display: none; }
   a { color: inherit; text-decoration: none; }
 }
