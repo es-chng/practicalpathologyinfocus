@@ -221,7 +221,7 @@ main,
 }
 .base-footer p { margin: 0.35rem 0; }
 .base-footer a { color: var(--accent); }
-.base-footer a.pdf-link {
+ a.pdf-link {
   display: inline;
   font-style: italic;
   text-decoration: none;
@@ -229,7 +229,7 @@ main,
   border: none;
   padding: 0;
 }
-.base-footer a.pdf-link:hover { text-decoration: underline; }
+a.pdf-link:hover { text-decoration: underline; }
 
 /* ---- schema fields (generic by style) ---- */
 .field {
