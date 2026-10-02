@@ -1,0 +1,81 @@
+version: 1
+article_type: journal_club
+
+# A structured appraisal of one published paper. The study's own findings and
+# the author's appraisal are kept apart.
+
+structure:
+  - article_type
+  - paper
+  - question
+  - study
+  - key_findings
+  - strengths
+  - limitations
+  - appraisal
+  - bottom_line
+  - references
+  - conflicts_declared
+
+blocks:
+
+  article_type:
+    shape: text
+    style: badge
+    label: "Article type"
+    optional: true
+
+  paper:                   # full citation of the paper discussed, with its DOI
+    shape: text
+    style: boxed
+    label: "Paper Discussed"
+
+  question:
+    shape: text
+    label: "Study Question"
+
+  study:                   # one group: the study at a glance
+    shape: block
+    label: "The Study"
+    field_order: [design, population, exposure, comparison, outcomes]
+    fields:
+      design:     { shape: text, label: "Design" }
+      population: { shape: text, label: "Population" }
+      exposure:   { shape: text, label: "Intervention or exposure" }
+      comparison: { shape: text, label: "Comparison", optional: true }
+      outcomes:   { shape: text, label: "Outcomes" }
+
+  key_findings:
+    shape: list
+    label: "Key Findings"
+
+  strengths:
+    shape: list
+    label: "Strengths"
+
+  limitations:
+    shape: list
+    label: "Limitations"
+
+  appraisal:               # the author's own view, set in italics
+    shape: text
+    style: opinion
+    label: "Our Appraisal"
+
+  bottom_line:
+    shape: text
+    style: boxed
+    label: "Bottom Line for Practice"
+    teaser: true
+    max_chars: 450
+
+  references:
+    shape: list
+    style: numbered
+    label: "References"
+    optional: true
+
+  conflicts_declared:
+    shape: boolean
+    label: "Conflicts of interest declared"
+    optional: true

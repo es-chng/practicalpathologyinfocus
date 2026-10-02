@@ -1,0 +1,43 @@
+{%- comment -%} One block, rendered by its schema shape and style. {%- endcomment -%}
+{%- assign f = include.field -%}
+{%- assign v = include.value -%}
+{%- if v != nil and v != "" and v != empty -%}
+  {%- assign style = f.style | default: "plain" -%}
+  {%- if f.shape == "table" and f.style == nil -%}{%- assign style = "table" -%}{%- endif -%}
+  {%- assign table_block = false -%}
+  {%- if f.shape == "table" or f.item.shape == "table" -%}{%- assign table_block = true -%}{%- endif -%}
+  {%- if f.style == "wide" -%}{%- assign table_block = true -%}{%- endif -%}
+  {%- if style == "section" -%}
+  <h2 class="section-heading">{{ v | markdownify | remove: '<p>' | remove: '</p>' }}</h2>
+  {%- else -%}
+  <div class="field field-style-{{ style }}{% if table_block %} field-table-block{% endif %}" data-key="{{ include.name }}">
+    {%- if f.label -%}
+      {%- if include.heading_level == 3 -%}<h3 class="field-label">{{ f.label }}</h3>
+      {%- else -%}<h2 class="field-label">{{ f.label }}</h2>{%- endif -%}
+    {%- endif -%}
+    {%- if f.shape == "text" -%}
+      <div class="field-text">{{ v | markdownify }}</div>
+    {%- elsif f.shape == "list" and f.item.shape == "table" -%}
+      {%- for t in v -%}{% include table.html caption=t.label columns=t.columns rows=t.rows %}{%- endfor -%}
+    {%- elsif f.shape == "image" -%}
+      <div class="figure-grid{% if style == 'wide' %} figure-grid-wide{% endif %}">{% include figure.html image=v %}</div>
+    {%- elsif f.shape == "list" and f.item.shape == "image" -%}
+      <div class="figure-grid{% if style == 'wide' %} figure-grid-wide{% endif %}">
+        {%- for img in v -%}{% include figure.html image=img %}{%- endfor -%}
+      </div>
+    {%- elsif f.shape == "list" and style == "numbered" -%}
+      <ol class="field-list field-list-numbered">{%- for item in v %}<li>{{ item }}</li>{% endfor -%}</ol>
+    {%- elsif f.shape == "list" -%}
+      <ul class="field-list">{%- for item in v %}<li>{{ item }}</li>{% endfor -%}</ul>
+    {%- elsif f.shape == "table" and f.columns == "dynamic" -%}
+      {% include table.html caption=v.label columns=v.columns rows=v.rows %}
+    {%- elsif f.shape == "table" -%}
+      {% include table.html columns=f.columns rows=v %}{%- comment -%} its label is the section heading {%- endcomment -%}
+    {%- elsif f.shape == "boolean" -%}
+      <p class="field-text">{% if v %}Yes{% else %}No{% endif %}</p>
+    {%- elsif f.shape == "date" -%}
+      <p class="field-text">{{ v | date: "%-d %B %Y" }}</p>
+    {%- endif -%}
+  </div>
+  {%- endif -%}
+{%- endif -%}

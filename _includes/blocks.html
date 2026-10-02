@@ -1,0 +1,25 @@
+{%- comment -%}
+  The article's blocks, in the order of its schema's structure. Knows shapes,
+  never block names: repeat and block shapes walk their sub-blocks in order.
+{%- endcomment -%}
+{%- assign _schema = site.data[include.article.schema] -%}
+<div class="schema-slot">
+{%- for name in _schema.structure -%}
+  {%- assign b = _schema.blocks[name] -%}
+  {%- assign value = include.article[name] -%}
+  {%- if b.shape == "repeat" -%}
+    {%- for item in value -%}
+    <section class="schema-section">
+      {%- for sub in b.item_order -%}{%- assign sf = b.item[sub] -%}{%- assign sv = item[sub] -%}{% include field.html field=sf name=sub value=sv heading_level=3 %}{%- endfor -%}
+    </section>
+    {%- endfor -%}
+  {%- elsif b.shape == "block" -%}
+    <section class="schema-block">
+      {%- if b.label -%}<h2 class="field-label">{{ b.label }}</h2>{%- endif -%}
+      {%- for sub in b.field_order -%}{%- assign sf = b.fields[sub] -%}{%- assign sv = value[sub] -%}{% include field.html field=sf name=sub value=sv %}{%- endfor -%}
+    </section>
+  {%- else -%}
+    {% include field.html field=b name=name value=value %}
+  {%- endif -%}
+{%- endfor -%}
+</div>

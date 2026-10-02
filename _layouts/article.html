@@ -1,0 +1,68 @@
+---
+layout: default
+---
+{%- assign slug = page.name | remove: page.ext -%}
+{%- assign doi = site.data['zenodo-ledger'][slug].doi | default: page.doi -%}
+{%- assign affs = page.authors | map: "affiliation" | compact | uniq -%}
+<article class="base-frame">
+  <header class="base-header">
+    <p class="base-badge">Volume {{ page.volume }}, Issue {{ page.issue }} · Article {{ page.order }}</p>
+    <h1>{{ page.title }}</h1>
+    <p class="base-authors">
+      {%- for a in page.authors -%}
+        {{ a.given }} {{ a.family }}
+        {%- if affs.size > 1 and a.affiliation -%}
+          {%- for af in affs -%}{%- if af == a.affiliation -%}<sup>{{ forloop.index }}</sup>{%- endif -%}{%- endfor -%}
+        {%- endif -%}
+        {%- if a.orcid %} <a class="orcid" href="https://orcid.org/{{ a.orcid | remove: 'https://orcid.org/' }}">ORCID</a>{%- endif -%}
+        {%- unless forloop.last %}, {% endunless -%}
+      {%- endfor -%}
+    </p>
+    {%- if affs.size > 0 %}
+    <div class="base-affiliations">
+      {%- for af in affs %}
+      <p>{% if affs.size > 1 %}<sup>{{ forloop.index }}</sup> {% endif %}{{ af }}</p>
+      {%- endfor %}
+    </div>
+    {%- endif %}
+    {%- if page.corresponding_email %}
+    <p class="base-correspondence">Correspondence: <a href="mailto:{{ page.corresponding_email }}">{{ page.corresponding_email }}</a></p>
+    {%- endif %}
+    <p class="base-date">Published {{ page.published_date | date: "%-d %B %Y" }}</p>
+    {%- comment -%}
+      Printed as the page-1 footnote of the PDF (assets/css/pdf.css); hidden on
+      screen. Kept free of newlines: WeasyPrint keeps them in footnotes.
+    {%- endcomment %}
+    <div class="pdf-citation" aria-label="Suggested citation">
+      {%- capture cite -%}
+        <strong>Cite as:</strong>&nbsp;
+        {%- for a in page.authors -%}
+          {{ a.family }}&nbsp;
+          {%- assign given_names = a.given | split: " " -%}
+          {%- for given_name in given_names -%}{{ given_name | slice: 0 }}{%- endfor -%}
+          {%- unless forloop.last -%}, {% endunless -%}
+        {%- endfor -%}
+        . {{ page.title | strip }}. <em>{{ site.title }}</em>. {{ page.published_date | date: "%Y" }};{{ page.volume }}({{ page.issue }}):{{ page.order }}.
+        {%- if doi %} doi:<a href="https://doi.org/{{ doi }}">{{ doi }}</a>
+          {%- if doi contains "10.5072/" %} (test DOI, not permanent){% endif -%}
+        {%- endif -%}
+      {%- endcapture -%}
+      <p>{{ cite | strip_newlines }}</p><p>Licence: {{ page.licence }}{% if page.corresponding_email %} · Correspondence: {{ page.corresponding_email }}{% endif %}</p></div>
+  </header>
+
+  {% include blocks.html article=page %}
+
+  <footer class="base-footer">
+    <p><a class="pdf-link" href="{{ '/files/' | append: slug | append: '.pdf' | relative_url }}">Download PDF</a></p>
+    <p>
+      <!--pdf-pages:{{ slug }}||{% if doi %} · {% endif %}-->
+      {%- if doi contains "10.5072/" -%}
+        <a href="https://sandbox.zenodo.org/records/{{ doi | split: 'zenodo.' | last }}">{{ doi }}</a>
+        <em>(test DOI from sandbox.zenodo.org, not permanent)</em>
+      {%- elsif doi -%}
+        <a href="https://doi.org/{{ doi }}">https://doi.org/{{ doi }}</a>
+      {%- endif -%}
+    </p>
+    <p>Licence: {{ page.licence }}</p>
+  </footer>
+</article>

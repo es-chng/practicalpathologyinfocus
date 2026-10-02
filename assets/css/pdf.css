@@ -1,0 +1,234 @@
+/* Print-only layout for the Jekyll article HTML. */
+@page {
+  size: A4;
+  margin: 19mm 16mm 18mm;
+
+  @top-left {
+    content: "Practical Pathology in Focus";
+    font: 7pt sans-serif;
+    color: #5c3d2e;
+  }
+  @top-right {
+    content: string(issue-meta);
+    font: 7pt sans-serif;
+    color: #5c5a56;
+  }
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font: 7pt sans-serif;
+    color: #5c5a56;
+  }
+  @footnote {
+    margin-top: 8pt;
+    padding-top: 4pt;
+    border-top: 0.4pt solid #d4d0c8;
+  }
+}
+
+:root {
+  --ink: #1a1a1a;
+  --muted: #5c5a56;
+  --rule: #d4d0c8;
+  --rule-strong: #8a877d;
+  --paper: #fff;
+  --accent: #5c3d2e;
+}
+
+@media print {
+  html, body {
+    margin: 0;
+    background: #fff !important;
+    color: var(--ink) !important;
+    font-family: "Liberation Serif", "Times New Roman", serif;
+    font-size: 9pt;
+    line-height: 1.28;
+    text-rendering: optimizeLegibility;
+  }
+
+  .site-header { display: none; }
+  .base-frame {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .base-header {
+    margin: 0 0 8pt;
+    padding: 0 0 6pt;
+    border-bottom: 0.8pt solid var(--rule-strong);
+    break-after: avoid;
+  }
+  .base-badge {
+    string-set: issue-meta content();
+    margin: 0 0 4pt;
+    padding: 0;
+    border: 0;
+    color: var(--accent);
+    font: bold 7pt sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .base-header h1 {
+    margin: 0 0 5pt;
+    color: var(--ink);
+    font: bold 18pt/1.15 "Liberation Serif", "Times New Roman", serif;
+    text-align: left;
+    hyphens: none;
+  }
+  .base-authors {
+    margin: 0 0 2pt;
+    font: 10pt/1.2 "Liberation Serif", "Times New Roman", serif;
+    color: var(--ink);
+  }
+  .base-affiliations,
+  .base-correspondence,
+  .base-date {
+    margin: 1pt 0;
+    color: var(--muted);
+    font: 7.5pt/1.2 "Liberation Serif", "Times New Roman", serif;
+  }
+  /* The citation sits in the header markup, so as a footnote it lands at
+     the foot of page 1. It is not a numbered note: no call, no marker. */
+  .pdf-citation {
+    display: block !important;
+    float: footnote;
+    footnote-display: block;
+    margin: 0;
+    color: var(--muted);
+    font: 7pt/1.25 "Liberation Serif", "Times New Roman", serif;
+    text-align: left;
+  }
+  .pdf-citation::footnote-call,
+  .pdf-citation::footnote-marker { content: none; }
+  .pdf-citation, .pdf-citation p { white-space: normal; }
+  .pdf-citation p { margin: 0 0 1pt; }
+  .pdf-citation a { color: inherit; text-decoration: none; }
+
+  .schema-slot { margin: 0; padding: 0; }
+  .schema-slot > .field.field-style-plain .field-text {
+    column-count: 2;
+    column-gap: 7mm;
+    column-fill: balance;
+  }
+  .schema-section {
+    margin: 7pt 0 9pt;
+    padding: 6pt 0 0;
+    border-top: 0.45pt solid var(--rule);
+    break-inside: auto;
+  }
+  .schema-section > .field.field-style-plain > .field-text {
+    column-count: 2;
+    column-gap: 7mm;
+    column-fill: balance;
+  }
+  .section-heading {
+    display: block;
+    column-span: all;
+    width: 100%;
+    max-width: none;
+    margin: 0 0 4pt;
+    color: var(--ink);
+    font: bold 11pt/1.2 "Liberation Serif", "Times New Roman", serif;
+    break-after: avoid;
+  }
+
+  .field {
+    margin: 3pt 0 5pt;
+    padding: 0;
+    break-inside: auto;
+  }
+  .field-label {
+    margin: 0 0 2pt;
+    color: var(--muted);
+    font: bold 7.2pt/1.15 sans-serif;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    break-after: avoid;
+  }
+  .field-text,
+  .field-list,
+  .field-text p,
+  .field-text li {
+    color: var(--ink);
+    font-size: 9pt;
+    line-height: 1.28;
+    text-align: justify;
+    hyphens: auto;
+    widows: 2;
+    orphans: 2;
+  }
+  .field-text p { margin: 0 0 3pt; }
+  .field-text p:last-child { margin-bottom: 0; }
+  .field-text h2,
+  .field-text h3,
+  .field-text h4 {
+    margin: 6pt 0 2pt;
+    color: var(--ink);
+    font: bold 8.5pt/1.2 sans-serif;
+    break-after: avoid;
+  }
+  .field-style-boxed {
+    column-span: all;
+    margin: 4pt 0 6pt;
+    padding: 5pt 7pt;
+    border-left: 1.2pt solid var(--accent);
+    background: #f4f2ed;
+    break-inside: avoid;
+  }
+  .field-style-boxed .field-label { color: var(--accent); }
+
+  /* Tables span both columns: schema tables via their block, Markdown
+     tables via the wrapper scripts/render_pdf.py adds (with column widths). */
+  .field-table-block { column-span: all; }
+  .field-markdown-table { width: 100%; column-span: all; margin: 4pt 0 7pt; break-inside: auto; }
+  .field-table-figure { margin: 3pt 0 7pt; }
+  .field-table-caption {
+    margin: 0 0 3pt;
+    color: var(--muted);
+    font: bold 7.2pt/1.2 sans-serif;
+    break-after: avoid;
+  }
+  .field-table,
+  .field-markdown-table table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font: 7.2pt/1.2 "Liberation Serif", "Times New Roman", serif;
+  }
+  .field-table thead, .field-markdown-table thead { display: table-header-group; }
+  .field-table tr, .field-markdown-table tr { break-inside: avoid; }
+  .field-table th, .field-table td,
+  .field-markdown-table th, .field-markdown-table td {
+    padding: 3pt 4pt;
+    border-bottom: 0.35pt solid var(--rule);
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: break-word;
+    hyphens: manual;
+  }
+  .field-table th, .field-markdown-table th {
+    border-top: 0.8pt solid var(--rule-strong);
+    border-bottom: 0.6pt solid var(--rule-strong);
+    font: bold 6.8pt/1.15 sans-serif;
+  }
+
+  /* Figures sit two per row, one per column, so a pair can be compared side
+     by side; style "wide" gives each the full width. Tall images are capped
+     so one figure cannot take a whole page. */
+  .figure-grid { display: block; column-count: 2; column-gap: 7mm; margin: 3pt 0 7pt; }
+  .figure-grid-wide { column-count: 1; }
+  .field-figure { margin: 0 0 6pt; break-inside: avoid; }
+  .field-figure img { width: 100%; height: auto; max-height: 110mm; object-fit: contain; }
+  .field-figure figcaption {
+    margin-top: 3pt;
+    color: var(--muted);
+    font: 7.2pt/1.25 "Liberation Serif", "Times New Roman", serif;
+    text-align: left;
+  }
+
+  .field-list { margin: 2pt 0; padding-left: 13pt; }
+  .field-list li { margin: 1pt 0; padding-left: 1pt; }
+  .schema-slot > .field-style-numbered .field-list { column-count: 2; column-gap: 7mm; }
+  .base-footer { display: none; }
+  a { color: inherit; text-decoration: none; }
+}

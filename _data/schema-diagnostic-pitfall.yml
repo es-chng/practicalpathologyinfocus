@@ -1,0 +1,95 @@
+version: 1
+article_type: diagnostic_pitfall
+
+# A diagnostic pitfall: one mimic, one true diagnosis, and how to tell them
+# apart. Each block below becomes a section of the web page and the PDF, in
+# the order of `structure`.
+
+structure:
+  - article_type
+  - pitfall
+  - why_it_matters
+  - when_it_happens
+  - comparison
+  - figures
+  - key_clue
+  - ancillary_tests
+  - how_to_avoid
+  - bottom_line
+  - references
+  - conflicts_declared
+  - last_reviewed
+
+blocks:
+
+  article_type:
+    shape: text
+    style: badge
+    label: "Article type"
+    optional: true
+
+  pitfall:                 # the error, stated plainly
+    shape: text
+    style: boxed
+    label: "The Pitfall"
+    max_chars: 350
+
+  why_it_matters:          # consequences of each kind of error
+    shape: text
+    label: "Why It Matters"
+
+  when_it_happens:         # specimens, sites and settings where it occurs
+    shape: text
+    label: "When It Happens"
+    optional: true
+
+  comparison:              # one row per feature, side by side
+    shape: table
+    label: "Distinguishing Features"
+    columns: [feature, favours_mimic, favours_diagnosis]
+
+  figures:                 # the mimic and the true lesion, ideally side by side
+    shape: list
+    label: "Figures"
+    optional: true
+    item:
+      shape: image
+
+  key_clue:                # the single most useful discriminator
+    shape: text
+    style: boxed
+    label: "The Key Clue"
+    max_chars: 350
+
+  ancillary_tests:
+    shape: text
+    label: "Ancillary Tests"
+    optional: true
+
+  how_to_avoid:
+    shape: list
+    style: numbered
+    label: "How to Avoid It"
+
+  bottom_line:
+    shape: text
+    style: boxed
+    label: "Bottom Line"
+    teaser: true
+    max_chars: 450
+
+  references:
+    shape: list
+    style: numbered
+    label: "References"
+    optional: true
+
+  conflicts_declared:
+    shape: boolean
+    label: "Conflicts of interest declared"
+    optional: true
+
+  last_reviewed:
+    shape: date
+    label: "Evidence reviewed on"
+    optional: true

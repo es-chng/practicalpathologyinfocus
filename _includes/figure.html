@@ -1,0 +1,9 @@
+{%- comment -%}
+  One figure: include.image is {file, caption, alt?, credit?}, with the file in
+  assets/images/. Figures are numbered by CSS, in the page and in the PDF.
+{%- endcomment -%}
+{%- assign img = include.image -%}
+<figure class="field-figure">
+  <img src="{{ '/assets/images/' | append: img.file | relative_url }}" alt="{{ img.alt | default: img.caption | strip_html | escape }}">
+  <figcaption>{{ img.caption | markdownify | remove: '<p>' | remove: '</p>' | strip }}{% if img.credit %} <span class="figure-credit">{{ img.credit }}</span>{% endif %}</figcaption>
+</figure>

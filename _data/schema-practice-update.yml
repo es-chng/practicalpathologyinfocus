@@ -1,0 +1,78 @@
+version: 1
+article_type: practice_update
+
+# What changed in a guideline, classification or reporting standard, and what
+# to do differently because of it.
+
+structure:
+  - article_type
+  - what_changed
+  - source
+  - effective_from
+  - background
+  - changes
+  - implications
+  - open_questions
+  - bottom_line
+  - references
+  - last_reviewed
+
+blocks:
+
+  article_type:
+    shape: text
+    style: badge
+    label: "Article type"
+    optional: true
+
+  what_changed:            # the change, in two sentences
+    shape: text
+    style: boxed
+    label: "What Changed"
+    max_chars: 350
+
+  source:                  # the guideline or classification, with edition
+    shape: text
+    label: "Source"
+
+  effective_from:
+    shape: date
+    label: "Effective from"
+    optional: true
+
+  background:
+    shape: text
+    label: "Background"
+
+  changes:                 # one row per area that changed
+    shape: table
+    label: "Before and Now"
+    columns: [area, before, now]
+
+  implications:
+    shape: list
+    style: numbered
+    label: "What to Do Differently"
+
+  open_questions:
+    shape: text
+    label: "Open Questions"
+    optional: true
+
+  bottom_line:
+    shape: text
+    style: boxed
+    label: "Bottom Line"
+    teaser: true
+    max_chars: 450
+
+  references:
+    shape: list
+    style: numbered
+    label: "References"
+    optional: true
+
+  last_reviewed:
+    shape: date
+    label: "Evidence reviewed on"
+    optional: true

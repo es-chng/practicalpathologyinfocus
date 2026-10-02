@@ -1,0 +1,8 @@
+{%- comment -%} Sets `teaser` and `badge` for include.article from its schema. {%- endcomment -%}
+{%- assign teaser = nil -%}
+{%- assign badge = nil -%}
+{%- assign _s = site.data[include.article.schema] -%}
+{%- for _n in _s.structure -%}
+  {%- if _s.blocks[_n].teaser -%}{%- assign teaser = include.article[_n] -%}{%- endif -%}
+  {%- if _s.blocks[_n].style == "badge" -%}{%- assign badge = include.article[_n] -%}{%- endif -%}
+{%- endfor -%}

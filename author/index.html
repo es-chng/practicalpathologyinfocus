@@ -1,0 +1,60 @@
+---
+layout: default
+title: Write an article
+permalink: /author/
+---
+{%- comment -%}
+  The article form. assets/js/author.js builds it from the article schemas
+  below, so it always matches them. Everything runs in the browser: nothing
+  typed here is sent anywhere.
+{%- endcomment -%}
+<main class="prose-page author-page">
+  <h1>Write an article</h1>
+  <p>Choose an article type and fill in the form. Then download the article file
+    and add it to the <code>_articles/</code> folder of the repository
+    (on GitHub: <em>Add file → Upload files</em>). Nothing you type leaves this page.</p>
+
+  <div class="af-controls">
+    <label>Article type <select id="af-schema"></select></label>
+    <label>Or edit an existing article <input type="file" id="af-load" accept=".md"></label>
+  </div>
+
+  <details class="af-design">
+    <summary>Designing an article type? Preview a schema here</summary>
+    <p>Write or paste a schema below, or start from an existing one. The form
+      switches to it as you type, and any rule it breaks is listed. Nothing is
+      saved: when it is right, download the schema file and add it to
+      <code>_data/</code> in the repository. (Starting from an existing schema
+      shows its content without the comments in its file.)</p>
+    <label>Start from <select id="af-start"><option value="">(choose a schema)</option></select></label>
+    <textarea id="af-yaml" rows="18" spellcheck="false" placeholder="version: 1&#10;article_type: my_type&#10;structure: [...]&#10;blocks: ..."></textarea>
+    <div id="af-yaml-report" class="af-report" aria-live="polite"></div>
+    <label>Schema file name <input type="text" id="af-schema-name" placeholder="schema-my-type"></label>
+    <button type="button" id="af-schema-download">Download schema file</button>
+  </details>
+
+  <form id="af-form" novalidate></form>
+
+  <div class="af-actions">
+    <button type="button" id="af-check">Check</button>
+    <button type="button" id="af-download">Download article file</button>
+    <button type="button" id="af-copy">Copy to clipboard</button>
+  </div>
+  <div id="af-report" class="af-report" aria-live="polite"></div>
+</main>
+
+<script>
+  window.SCHEMAS = {
+  {%- assign first = true -%}
+  {%- for pair in site.data -%}
+    {%- if pair[0] contains "schema-" and pair[0] != "schema-locks" -%}
+      {%- unless first %},{% endunless %}
+      {{ pair[0] | jsonify }}: {{ pair[1] | jsonify }}
+      {%- assign first = false -%}
+    {%- endif -%}
+  {%- endfor %}
+  };
+  window.LOCKED = {{ site.data['schema-locks'] | jsonify }};
+</script>
+<script src="{{ '/assets/js/js-yaml.min.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/author.js' | relative_url }}"></script>

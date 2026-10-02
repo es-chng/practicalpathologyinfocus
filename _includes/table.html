@@ -1,0 +1,11 @@
+<figure class="field-table-figure">
+{%- if include.caption -%}<figcaption class="field-table-caption">{{ include.caption }}</figcaption>{%- endif -%}
+<table class="field-table">
+  <thead><tr>{% for c in include.columns %}<th>{{ c | replace: "_", " " | capitalize }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {%- for row in include.rows %}
+    <tr>{% for c in include.columns %}<td>{{ row[c] }}</td>{% endfor %}</tr>
+  {%- endfor %}
+  </tbody>
+</table>
+</figure>

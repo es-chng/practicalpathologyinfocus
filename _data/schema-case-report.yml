@@ -1,0 +1,99 @@
+version: 1
+article_type: case_report
+
+# One instructive case: what was seen, what it turned out to be, what it teaches.
+
+structure:
+  - article_type
+  - question
+  - presentation
+  - investigations
+  - pathology
+  - figures
+  - findings
+  - diagnosis
+  - discussion
+  - learning_points
+  - bottom_line
+  - references
+  - consent_obtained
+  - conflicts_declared
+
+blocks:
+
+  article_type:
+    shape: text
+    style: badge
+    label: "Article type"
+    optional: true
+
+  question:                # what makes the case instructive
+    shape: text
+    style: boxed
+    label: "Clinical Question"
+    max_chars: 350
+
+  presentation:
+    shape: text
+    label: "Case Presentation"
+
+  investigations:          # laboratory and imaging, before pathology
+    shape: text
+    label: "Investigations"
+    optional: true
+
+  pathology:               # gross, microscopy, special stains, molecular
+    shape: text
+    label: "Pathological Findings"
+
+  figures:                 # micrographs and gross images: file, caption, alt, credit
+    shape: list
+    label: "Figures"
+    optional: true
+    item:
+      shape: image
+
+  findings:                # optional tables, e.g. an immunohistochemistry panel
+    shape: list
+    label: "Findings"
+    optional: true
+    item:
+      shape: table
+      columns: dynamic
+
+  diagnosis:
+    shape: text
+    style: boxed
+    label: "Final Diagnosis"
+    max_chars: 300
+
+  discussion:
+    shape: text
+    label: "Discussion"
+
+  learning_points:
+    shape: list
+    style: numbered
+    label: "Learning Points"
+
+  bottom_line:
+    shape: text
+    style: boxed
+    label: "Bottom Line"
+    teaser: true
+    max_chars: 450
+
+  references:
+    shape: list
+    style: numbered
+    label: "References"
+    optional: true
+
+  consent_obtained:        # required: publishing a case needs the patient's consent
+    shape: boolean
+    label: "Patient consent for publication obtained"
+
+  conflicts_declared:
+    shape: boolean
+    label: "Conflicts of interest declared"
+    optional: true

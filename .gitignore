@@ -1,0 +1,11 @@
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.bundle/
+vendor/
+__pycache__/
+.pdf-cache/
+.pdf-out/
+.venv/
+*.pyc
+.DS_Store

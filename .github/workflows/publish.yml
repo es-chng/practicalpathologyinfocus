@@ -1,0 +1,123 @@
+name: Publish
+
+# Every push to main: check, build the site, print PDFs and publish.
+# Run by hand (Actions -> Publish -> Run workflow) to also deposit to Zenodo.
+# Runs monthly too, so a broken tool shows up before you next need it.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["README.md", "LICENSE", "CITATION.cff", ".zenodo.json"]
+  schedule:
+    - cron: "0 3 1 * *"
+  workflow_dispatch:
+    inputs:
+      zenodo:
+        description: "Zenodo"
+        type: choice
+        default: none
+        options: [none, sandbox-test, live, clear-test-dois]
+      force:
+        description: "Deposit unchanged articles again"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # A fixed Ubuntu release: system package names above can change between
+    # releases. Move to a newer one deliberately, e.g. every two years.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        id: python
+        with:
+          python-version: "3.12"
+
+      # Python packages live in .venv, cached until requirements.txt changes.
+      - uses: actions/cache@v4
+        id: venv
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-py${{ steps.python.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
+      - name: Install Python packages (only when requirements.txt changed)
+        if: steps.venv.outputs.cache-hit != 'true'
+        run: python -m venv .venv && .venv/bin/pip install -r requirements.txt
+      - run: echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+
+      # WeasyPrint's system libraries: installed only if the runner lacks them.
+      - name: Install WeasyPrint's system libraries (only if missing)
+        run: |
+          pkgs="fonts-liberation libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 libgdk-pixbuf-2.0-0"
+          dpkg -s $pkgs >/dev/null 2>&1 && exit 0
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends $pkgs
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Check articles, issues and schemas
+        run: python scripts/validate.py
+
+      - name: Deposit to Zenodo
+        if: github.event_name == 'workflow_dispatch' && inputs.zenodo != 'none'
+        env:
+          ZENODO_TOKEN: ${{ inputs.zenodo == 'live' && secrets.ZENODO_TOKEN || secrets.ZENODO_SANDBOX_TOKEN }}
+          JEKYLL_BASEURL: ${{ steps.pages.outputs.base_path }}
+        run: |
+          case "${{ inputs.zenodo }}" in
+            live)            python scripts/zenodo.py --live ${{ inputs.force && '--force' || '' }} ;;
+            sandbox-test)    python scripts/zenodo.py ${{ inputs.force && '--force' || '' }} ;;
+            clear-test-dois) python scripts/zenodo.py --clear-tests ;;
+          esac
+
+      - name: Commit new schema locks and DOIs
+        run: |
+          git add _data/schema-locks.yml _data/zenodo-ledger.yml
+          git diff --cached --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Record schema locks / DOIs [skip ci]"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - uses: actions/cache@v4
+        with:
+          path: .pdf-cache
+          key: pdf-cache-v4-${{ github.run_id }}
+          restore-keys: pdf-cache-v4-
+
+      - name: Build the site
+        run: bundle exec jekyll build --baseurl "$JEKYLL_BASEURL"
+        env:
+          JEKYLL_ENV: production
+          JEKYLL_BASEURL: ${{ steps.pages.outputs.base_path }}
+
+      - name: Print new or changed PDFs into the site, and fill in page counts
+        run: python scripts/build_pdfs.py _site/files --site-dir _site --cache .pdf-cache --baseurl "$JEKYLL_BASEURL"
+        env:
+          JEKYLL_BASEURL: ${{ steps.pages.outputs.base_path }}
+
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

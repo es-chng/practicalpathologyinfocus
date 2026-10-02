@@ -1,0 +1,19 @@
+---
+layout: default
+title: Issues
+permalink: /issues/
+---
+<main class="prose-page">
+  <h1>Issues</h1>
+  <ul class="issue-list">
+    {%- assign all = site.issues | sort: "published_date" | reverse -%}
+    {%- for iss in all %}
+    <li>
+      <a href="{{ iss.url | relative_url }}">Volume {{ iss.volume }}, Issue {{ iss.issue }}</a>
+      <span class="issue-list-date">{{ iss.published_date | date: "%-d %B %Y" }}{% if iss.theme %} &middot; {{ iss.theme }}{% endif %}</span>
+    </li>
+    {%- else %}
+    <li>No issues yet.</li>
+    {%- endfor %}
+  </ul>
+</main>

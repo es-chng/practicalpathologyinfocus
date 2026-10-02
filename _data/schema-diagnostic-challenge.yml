@@ -1,0 +1,81 @@
+version: 1
+article_type: diagnostic_challenge
+
+# A self-test case: the reader is given the case and a question, then the
+# answer and its reasoning. Text only for now: the system has no image blocks.
+
+structure:
+  - article_type
+  - case
+  - images
+  - findings
+  - question
+  - options
+  - answer
+  - explanation
+  - differential
+  - teaching_point
+  - references
+
+blocks:
+
+  article_type:
+    shape: text
+    style: badge
+    label: "Article type"
+    optional: true
+
+  case:
+    shape: text
+    label: "The Case"
+
+  images:                  # the slide(s) the reader is asked to interpret
+    shape: list
+    label: "Images"
+    optional: true
+    item:
+      shape: image
+
+  findings:                # what the slide shows, described
+    shape: text
+    label: "Findings"
+
+  question:
+    shape: text
+    style: boxed
+    label: "Question"
+    max_chars: 300
+
+  options:                 # the choices, in order
+    shape: list
+    style: numbered
+    label: "Options"
+
+  answer:
+    shape: text
+    style: boxed
+    label: "Answer"
+    max_chars: 200
+
+  explanation:
+    shape: text
+    label: "Explanation"
+
+  differential:            # why each other option is less likely
+    shape: table
+    label: "Why Not the Others"
+    optional: true
+    columns: [option, against_it]
+
+  teaching_point:
+    shape: text
+    style: boxed
+    label: "Teaching Point"
+    teaser: true
+    max_chars: 350
+
+  references:
+    shape: list
+    style: numbered
+    label: "References"
+    optional: true

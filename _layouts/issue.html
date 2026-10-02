@@ -1,0 +1,29 @@
+---
+layout: default
+---
+{%- assign in_issue = site.articles | where: "volume", page.volume | where: "issue", page.issue
+     | where: "status", "published" | sort: "order" -%}
+<div class="base-frame">
+  <p class="base-badge">Volume {{ page.volume }}, Issue {{ page.issue }}</p>
+  <h1>{% if page.theme %}{{ page.theme }}{% else %}Volume {{ page.volume }}, Issue {{ page.issue }}{% endif %}</h1>
+  <p class="base-date">Published {{ page.published_date | date: "%-d %B %Y" }}</p>
+  {%- assign intro = content | strip -%}
+  {%- if intro != "" %}
+  <section class="issue-intro" aria-label="About this issue">{{ content }}</section>
+  {%- endif %}
+  <ol class="issue-toc">
+    {%- for article in in_issue -%}
+      {% include summary.html article=article %}
+      <li class="toc-item">
+        <a href="{{ article.url | relative_url }}">{{ article.title }}</a>
+        <p class="toc-meta">
+          {%- for a in article.authors -%}{{ a.given }} {{ a.family }}{% unless forloop.last %}, {% endunless %}{%- endfor -%}
+          <!--pdf-pages:{{ article.slug }}| · |-->
+        </p>
+        {%- if teaser %}<p class="toc-teaser">{{ teaser }}</p>{% endif -%}
+      </li>
+    {%- else -%}
+      <li class="toc-item"><p class="toc-teaser">No published articles yet.</p></li>
+    {%- endfor -%}
+  </ol>
+</div>

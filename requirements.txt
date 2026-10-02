@@ -1,0 +1,5 @@
+# Exact versions, so a new release can never change the output unnoticed.
+# To upgrade: change a version, push, and check the build and the PDFs.
+pyyaml==6.0.3
+requests==2.33.1
+weasyprint==70.0

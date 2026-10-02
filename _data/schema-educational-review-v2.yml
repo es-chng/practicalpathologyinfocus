@@ -1,0 +1,109 @@
+version: 2
+# Version 2 of the educational review: as version 1, plus optional figures in
+# each section. Version 1 stays for the articles already published with it.
+article_type: educational_review
+
+structure:
+  - article_type
+  - question
+  - background
+  - sections
+  - take_home_messages
+  - bottom_line
+  - references
+  - conflicts_declared
+  - last_reviewed
+  - editorial_note
+
+blocks:
+
+  article_type:
+    shape: text
+    style: badge
+    label: "Article type"
+    optional: true
+
+  question:
+    shape: text
+    style: boxed
+    label: "Core Question"
+
+  background:
+    shape: text
+    label: "Background"
+
+  sections:
+    shape: repeat
+    item_order:
+      - heading
+      - question
+      - content
+      - figures
+      - tables
+      - bottom_line
+    item:
+      heading:
+        shape: text
+        style: section
+        # value IS the subheading (h2); not a question
+      question:
+        shape: text
+        style: boxed
+        label: "Question"
+        optional: true
+        max_chars: 250
+      content:
+        shape: text
+        optional: true
+      figures:             # images for this section: file, caption, alt, credit
+        shape: list
+        optional: true
+        item:
+          shape: image
+      tables:
+        shape: list
+        optional: true
+        item:
+          shape: table
+          columns: dynamic
+      bottom_line:
+        shape: text
+        style: boxed
+        label: "Bottom line"
+        optional: true
+        max_chars: 450
+
+  take_home_messages:
+    shape: list
+    style: numbered
+    label: "Take-Home Messages"
+    optional: true
+
+  bottom_line:
+    shape: text
+    style: boxed
+    label: "Summary / Bottom Line"
+    teaser: true
+    max_chars: 450
+
+  references:
+    shape: list
+    style: numbered
+    label: "References"
+    optional: true
+
+  conflicts_declared:
+    shape: boolean
+    label: "Conflicts of interest declared"
+    optional: true
+
+  last_reviewed:
+    shape: date
+    label: "Evidence reviewed on"
+    optional: true
+
+  editorial_note:
+    shape: text
+    style: opinion
+    label: "Editorial note"         # published like every other block
+    optional: true
