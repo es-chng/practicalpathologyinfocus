@@ -29,7 +29,7 @@ layout: default
     <p class="base-correspondence">Correspondence: <a href="mailto:{{ page.corresponding_email }}">{{ page.corresponding_email }}</a></p>
     {%- endif %}
     <p class="base-date">Published {{ page.published_date | date: "%-d %B %Y" }}</p>
-    <p><a class="pdf-link" href="{{ '/files/' | append: slug | append: '.pdf' | relative_url }}">Download PDF</a>       <!--pdf-pages:{{ slug }}||{% if doi %} · {% endif %}--></p>
+    <p class="pdf-download"><a class="pdf-link" href="{{ '/files/' | append: slug | append: '.pdf' | relative_url }}">Download PDF</a><!--pdf-pages:{{ slug }}| · |--></p>
     {%- comment -%}
       Printed as the page-1 footnote of the PDF (assets/css/pdf.css); hidden on
       screen. Kept free of newlines: WeasyPrint keeps them in footnotes.
