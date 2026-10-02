@@ -29,6 +29,7 @@ layout: default
     <p class="base-correspondence">Correspondence: <a href="mailto:{{ page.corresponding_email }}">{{ page.corresponding_email }}</a></p>
     {%- endif %}
     <p class="base-date">Published {{ page.published_date | date: "%-d %B %Y" }}</p>
+    {%- comment -%} The download link is for the web page only: pdf.css hides it in the PDF. {%- endcomment %}
     <p class="pdf-download"><a class="pdf-link" href="{{ '/files/' | append: slug | append: '.pdf' | relative_url }}">Download PDF</a><!--pdf-pages:{{ slug }}| · |--></p>
     {%- comment -%}
       Printed as the page-1 footnote of the PDF (assets/css/pdf.css); hidden on
@@ -54,9 +55,7 @@ layout: default
   {% include blocks.html article=page %}
 
   <footer class="base-footer">
-
     <p>
-      <!--pdf-pages:{{ slug }}||{% if doi %} · {% endif %}-->
       {%- if doi contains "10.5072/" -%}
         <a href="https://sandbox.zenodo.org/records/{{ doi | split: 'zenodo.' | last }}">{{ doi }}</a>
         <em>(test DOI from sandbox.zenodo.org, not permanent)</em>

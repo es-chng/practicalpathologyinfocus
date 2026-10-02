@@ -230,5 +230,16 @@
   .field-list li { margin: 1pt 0; padding-left: 1pt; }
   .schema-slot > .field-style-numbered .field-list { column-count: 2; column-gap: 7mm; }
   .base-footer, .pdf-download { display: none; }
+
+  /* The issue PDF: contents first, then each article on a new page. The
+     contents give each article's first page, worked out by WeasyPrint. */
+  .issue-intro { max-width: none; font-size: 9.5pt; }
+  .issue-contents { margin: 14pt 0 6pt; font: bold 8pt sans-serif; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+  .issue-toc { list-style: none; margin: 0; padding: 0; }
+  .issue-toc .toc-item { margin: 0 0 9pt; break-inside: avoid; }
+  .issue-toc .toc-item > a { display: block; color: var(--ink); text-decoration: none; font-weight: bold; font-size: 10pt; }
+  .issue-toc .toc-item > a::after { content: leader(". ") target-counter(attr(href url), page); font-weight: normal; }
+  .issue-toc .toc-meta, .issue-toc .toc-teaser { margin: 2pt 0 0; font-size: 8.5pt; color: var(--muted); }
+  .issue-article { break-before: page; }
   a { color: inherit; text-decoration: none; }
 }

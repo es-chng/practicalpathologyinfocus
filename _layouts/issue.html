@@ -7,10 +7,15 @@ layout: default
   <p class="base-badge">Volume {{ page.volume }}, Issue {{ page.issue }}</p>
   <h1>{% if page.theme %}{{ page.theme }}{% else %}Volume {{ page.volume }}, Issue {{ page.issue }}{% endif %}</h1>
   <p class="base-date">Published {{ page.published_date | date: "%-d %B %Y" }}</p>
+  {%- assign islug = page.name | remove: page.ext -%}
+  {%- if in_issue.size > 0 %}
+  <p class="pdf-download"><a class="pdf-link" href="{{ '/files/issue-' | append: islug | append: '.pdf' | relative_url }}">Download the whole issue (PDF)</a><!--pdf-pages:issue-{{ islug }}| · |--></p>
+  {%- endif %}
   {%- assign intro = content | strip -%}
   {%- if intro != "" %}
   <section class="issue-intro" aria-label="About this issue">{{ content }}</section>
   {%- endif %}
+  <h2 class="issue-contents">Contents</h2>
   <ol class="issue-toc">
     {%- for article in in_issue -%}
       {% include summary.html article=article %}

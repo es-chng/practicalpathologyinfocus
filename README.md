@@ -176,7 +176,8 @@ One GitHub Actions workflow (“Publish”) does everything:
 commit to main (or monthly scheduled run)
   1. Validate articles, issues and schemas; lock newly published schemas
   2. Build the Jekyll site
-  3. Print new or changed articles to PDF and inject page counts
+  3. Print new or changed articles to PDF, and each issue as one PDF
+     (contents page + all its published articles); inject page counts
   4. Publish to GitHub Pages
 ```
 

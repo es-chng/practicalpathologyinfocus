@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Print every article's built page to PDF, then fill page counts into the site.
+"""Print every article's built page to PDF, and each issue as one PDF, then fill
+page counts into the site.
 
 Run after the site is built. A PDF is reused only when its article, schema,
 built page, stylesheets or scripts are unchanged.
@@ -14,8 +15,8 @@ import re
 import shutil
 import sys
 
-from journal import DATA, ROOT, articles, config, front_matter
-from render_pdf import build
+from journal import DATA, ROOT, articles, config, front_matter, is_published, issues
+from render_pdf import build, build_issue
 
 
 PDF_CSS = ROOT / "assets" / "css" / "pdf.css"
@@ -104,6 +105,40 @@ def main():
                 print(f"FAIL   {slug}: {error}", file=sys.stderr)
                 continue
 
+        if cache != args.out:
+            shutil.copy2(pdf_path, args.out / pdf_path.name)
+
+    # One PDF per issue: its contents page and all its published articles, in
+    # order. Rebuilt only when the issue page or one of its articles changes.
+    for issue_path in issues():
+        fm = front_matter(issue_path)
+        members = sorted((front_matter(p)["order"], p.stem) for p in articles()
+                         if is_published(front_matter(p))
+                         and (front_matter(p).get("volume"), front_matter(p).get("issue")) == (fm.get("volume"), fm.get("issue")))
+        if not members:
+            continue
+        key, html_path = f"issue-{issue_path.stem}", site_dir / "issues" / issue_path.stem / "index.html"
+        pdf_path = cache / f"{key}.pdf"
+        if any(slug not in manifest for _, slug in members) or not html_path.is_file():
+            failed.append(key)
+            print(f"FAIL   {key}: an article PDF or the issue page is missing", file=sys.stderr)
+            continue
+        h = hashlib.sha256(re.sub(rb"\?v=\d+", b"", html_path.read_bytes()))
+        for _, slug in members:
+            h.update(manifest[slug]["hash"].encode())
+        digest = h.hexdigest()
+        if old.get(key, {}).get("hash") == digest and pdf_path.is_file():
+            manifest[key] = old[key]
+        else:
+            try:
+                pages = build_issue(html_path, {slug: site_dir / "articles" / slug / "index.html" for _, slug in members},
+                                    pdf_path, site_dir=site_dir, baseurl=baseurl)
+                manifest[key] = {"hash": digest, "pages": pages}
+                built.append(key)
+            except Exception as error:  # report, then fail the workflow
+                failed.append(key)
+                print(f"FAIL   {key}: {error}", file=sys.stderr)
+                continue
         if cache != args.out:
             shutil.copy2(pdf_path, args.out / pdf_path.name)
 

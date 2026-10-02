@@ -9,6 +9,8 @@ made to a copy of the page (the website itself is untouched):
     columns (WeasyPrint does not apply column-span to a table itself).
 Both work on HTML this site generates itself, where tables never nest.
 
+A whole issue is printed the same way, as one document (build_issue).
+
 Usage: python scripts/render_pdf.py _site/articles/NAME/index.html out.pdf
 """
 import html
@@ -61,23 +63,52 @@ def with_column_widths(match):
     return f'<div class="field-markdown-table">{table}</div>' if is_markdown else table
 
 
-def build(page_html, out, site_dir=None, baseurl=None):
-    """Print the page; return its number of pages."""
-    page_html = pathlib.Path(page_html).resolve()
-    site_dir = pathlib.Path(site_dir).resolve() if site_dir else page_html.parents[2]
-    baseurl = (config().get("baseurl", "") if baseurl is None else baseurl).rstrip("/")
-    source = page_html.read_text(encoding="utf-8")
+def _print(source, out, site_dir, baseurl):
+    """Print HTML source to a PDF; return its number of pages."""
     # stylesheets and images: "/baseurl/assets/x?v=123" -> "assets/x", read from site_dir
     source = re.sub(r'(<(?:link|img)\b[^>]*\b(?:href|src)=")' + re.escape(baseurl) + r'/([^"?]*)(?:\?[^"]*)?"',
                     r'\1\2"', source)
     source = TABLE.sub(with_column_widths, source)
     # images are downsampled to 300 dpi at their printed size: print quality, small
     # files. These options must be given to render(), where images are loaded.
-    document = HTML(string=source, base_url=site_dir.as_uri() + "/").render(
+    document = HTML(string=source, base_url=pathlib.Path(site_dir).resolve().as_uri() + "/").render(
         optimize_images=True, dpi=300, jpeg_quality=85)
     pathlib.Path(out).parent.mkdir(parents=True, exist_ok=True)
     document.write_pdf(str(out))
     return len(document.pages)
+
+
+def _baseurl(baseurl):
+    return (config().get("baseurl", "") if baseurl is None else baseurl).rstrip("/")
+
+
+def build(page_html, out, site_dir=None, baseurl=None):
+    """Print one built article page; return its number of pages."""
+    page_html = pathlib.Path(page_html).resolve()
+    site_dir = site_dir or page_html.parents[2]
+    return _print(page_html.read_text(encoding="utf-8"), out, site_dir, _baseurl(baseurl))
+
+
+ARTICLE = re.compile(r'<article class="base-frame">.*?</article>', re.S)
+
+
+def build_issue(issue_html, article_pages, out, site_dir, baseurl=None):
+    """Print a whole issue as one document; return its number of pages.
+
+    The issue page becomes the contents; each article page's <article> follows
+    on a new page, so page numbers run through the issue and the contents can
+    give each article's first page. article_pages: {slug: built page}, in order.
+    """
+    baseurl = _baseurl(baseurl)
+    source = pathlib.Path(issue_html).read_text(encoding="utf-8")
+    parts = []
+    for slug, page in article_pages.items():
+        article = ARTICLE.search(pathlib.Path(page).read_text(encoding="utf-8")).group(0)
+        parts.append(f'<section class="issue-article" id="article-{slug}">{article}</section>')
+        # contents links go to the article inside this PDF, not to its web page
+        source = source.replace(f'href="{baseurl}/articles/{slug}/"', f'href="#article-{slug}"')
+    source = source.replace("</body>", '<div class="issue-articles">' + "".join(parts) + "</div></body>", 1)
+    return _print(source, out, site_dir, baseurl)
 
 
 if __name__ == "__main__":
